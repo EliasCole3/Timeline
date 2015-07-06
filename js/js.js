@@ -126,7 +126,7 @@ var abc = {
     
     abc.events.forEach(function(event) {
       
-      abc.timelineItems.push({
+      abc.timelineItems.add({
         id: event.eventId,
         group: 1,
         content: event.name,
@@ -171,7 +171,7 @@ var abc = {
   
   timelineGroups: "",
   
-  timelineItems: "",
+  timelineItems: [],
   
   
   

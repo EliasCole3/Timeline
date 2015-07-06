@@ -7,6 +7,8 @@
 var express  = require('express');        // call express
 var app = express();                 // define our app using express
 var bodyParser = require('body-parser');
+var url = "mongodb://localhost:27017/timeline";
+var mongoClient = require("mongodb").MongoClient;
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -28,7 +30,7 @@ app.use(allowCrossDomain);
 var port = process.env.PORT || 8081;        // set our port
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/timeline'); // connect to our database
+mongoose.connect(url); // connect to our database
 
 
 var Event = require('./app/models/event');
@@ -49,7 +51,11 @@ router.route('/events')
 
   .post(function(req, res) {
       
-      var event = new Event();      
+    abc.getAndUpdateCounter(function(eventId) {
+      
+      var event = new Event();    
+      
+      event.eventId = eventId;
       event.name = req.body.name;  
       event.type = req.body.type;  
       event.startDate = req.body.startDate;  
@@ -64,6 +70,8 @@ router.route('/events')
           res.json({ message: 'Event created!', event: event });
       });
       
+    });
+
   })
   
   .get(function(req, res) {
@@ -135,13 +143,72 @@ app.listen(port);
 console.log('Magic happens on port ' + port);
 
 
+var abc = {
+  
+  getAndUpdateCounter: function(callback) {
+
+    mongoClient.connect(url, function(err, db) {
+      
+      //if connecting failed
+      if(err) {
+        console.log(err);
+      } else {
+      
+        // console.log("Connected correctly to server");
+        
+        var collection = db.collection('counters');
+        
+        //find the document that has the eventId record
+        collection.find({
+          eventId: {
+            $exists: true
+          }
+        }).toArray(function(err, docs) {
+          
+          //if the document containing eventId couldn't be found
+          if(err) {
+            console.log(err);
+          } else {
+
+            //get the eventId
+            var eventId = docs[0].eventId;
+            var newEventId = eventId + 1;
+            
+            // console.log("eventId: " + eventId);
+            // console.log("newEventId: " + newEventId);
+            
+            //update the eventId to eventId++ for next time
+            var search  = { eventId: eventId };
+            var update = { $set: { eventId : newEventId } };
+            collection.update(
+            search, 
+            update, 
+            function(err, result) {
+              //close the connection and continue process the callback to continue with execution
+              db.close();
+              callback(eventId);
+            });
+            
+          }
+        });
+      
+      }
+      
+    });
+
+  },
+  
+};
 
 
+// var eventId = abc.getAndUpdateCounter();
+// console.log("eventId at the end: " + eventId);
 
+// console.log("eventId at the end: " + abc.getAndUpdateCounter());
 
-
-
-
+// abc.getAndUpdateCounter(function(eventId) {
+  // console.log("eventId at the end: " + eventId);
+// });
 
 
 
