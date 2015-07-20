@@ -26,7 +26,8 @@ var abc = {
     
     abc.retrieveEvents().then(function() {
       abc.createTimeline();
-      abc.createDataTable();
+      abc.createDynaTable();
+      abc.assignHandlerEventReadButtons();
     });
     
   },
@@ -37,6 +38,12 @@ var abc = {
       var formHtml = abc.getEventCreateForm();
       abc.showModal(headerText, formHtml);
       abc.assignHandlerForEventCreateForm();
+    });
+  },
+  
+  assignHandlerEventReadButtons: function() {
+    $(".model-read").click(function() {
+      console.log($(this).attr("name"));
     });
   },
   
@@ -135,118 +142,38 @@ var abc = {
   
   
   
-  createDataTable: function() {
-    var modelTable;
-    var columnNumber = -1;
-    
-    var columnDefs = [
-      {
-          "targets": [++columnNumber],
-          "data": "eventId"
-      },
-      {
-          "targets": [++columnNumber],
-          "data": "name"
-      },
-      {
-          "targets": [++columnNumber],
-          "data": "type"
-      },
-      {
-          "targets": [++columnNumber],
-          "data": "startDate"
-      },
-      {
-          "targets": [++columnNumber],
-          "data": "endDate"
-      },
-      {
-          "targets": [++columnNumber],
-          "data": "details"
-      },
-      {
-          "targets": [++columnNumber],
-          "data": null,
-          "render": function (data, type, row) {
-             return "<button class='btn btn-default model-delete' id='delete-" + row.eventId + "' name='delete-for-" + row.name + "'>" + " <i class='glyphicon glyphicon-trash'></i> </button>" +"<button class='btn btn-default model-update' id='update-" + row.eventId + "' name='update-for-" + row.name + "'>" +"<i class='glyphicon glyphicon-edit'></i> </button>" +"<button class='btn btn-default model-view' data-popup-target='#View-Popup' id='view-" + row.eventId + "' name='view-for-" + row.name + "'>" +"<i class='glyphicon glyphicon-eye-open'></i> </button>";
-          }
-      },
-      // {
-        // "targets": [++columnNumber],
-        // "data": "_id"
-      // },
-    ];
-    
-    // console.log(columnNumber);
-    
-    // var columnDefs = [
-    
-    // ];
-    console.log(abc.events);
-    
-    var data = {
-      "data": deepcopy(abc.events)
-    };
-    
-    console.log(data);
-    
-    // data = JSON.parse(JSON.stringify(data));
-    // data = JSON.stringify(data);
-    
-    console.log(data);
-    
-    data = {
-    "data": [
-              {
-                  "_id": "5599a2fed4d419403cd844db",
-                  "eventId": "1",
-                  "name": "eventname1",
-                  "type": "type1",
-                  "startDate": "2015-07-01",
-                  "endDate": "2015-07-01",
-                  "details": "details1"
-              },
-              {
-                  "_id": "5599a2fed4d419403cd844dc",
-                  "eventId": "42",
-                  "name": "eventname2",
-                  "type": "type2",
-                  "startDate": "2015-07-01",
-                  "endDate": "2015-07-01",
-                  "details": "details"
-              },
-              {
-                  "_id": "5599bc09c00945b009000001",
-                  "endDate": "2015-07-10",
-                  "startDate": "2015-07-18",
-                  "type": "asdf",
-                  "name": "eventname1",
-                  "eventId": "2",
-                  "details": "asdf"
-              }
-          ]
-      };
+  createDynaTable: function() {
 
-    modelTable = $("#data-table").DataTable({ //.dataTable = v1.9 instead of 1.10
-      // "ajax": function(data, callback, settings) { //data and settings necessary for DataTables(don't know why)
-        // $.get(abc.apiuri, function(response) {
-          // //console.log(response);
-          // console.log(data);
-          // callback(response);
-        // });
-      // },
-      // "ajax": JSON.stringify(abc.events),
-      "ajax": data,
-      // "sAjaxDataProp": "",
-      "columnDefs": columnDefs,
-      "dom": '<"#datatables-search"f>' +
-        '<"#datatables-table"t>' +
-        '<"#datatables-entries"l>' +
-        '<"#datatables-info"i>' +
-        '<"#datatables-pagination"p>'
-    });
+    var data = deepcopy(abc.events);
     
-    console.log(data);
+    data.forEach(function(event) {
+      var htmlString = "";
+      
+      htmlString = "<button class='btn btn-default model-delete' id='delete-" + event.eventId + "' name='delete-for-" + event.name + "'>" + 
+      "<i class='glyphicon glyphicon-trash'></i> </button>" +
+      "<button class='btn btn-default model-update' id='update-" + event.eventId + "' name='update-for-" + event.name + "'>" +
+      "<i class='glyphicon glyphicon-edit'></i> </button>" +
+      "<button class='btn btn-default model-read' data-popup-target='#View-Popup' id='read-" + event.eventId + "' name='read-for-" + event.name + "'>" +
+      "<i class='glyphicon glyphicon-eye-open'></i> </button>";
+   
+      event["actions"] = htmlString;
+      
+    });
+
+      $("#dynatable").dynatable({
+        dataset: {
+          // records: abc.events
+          records: data
+        },
+        features: {
+          paginate: true,
+          recordCount: true,
+          sorting: true,
+          search: true
+        },
+      });
+
+      console.log(data);
     
   },
   
