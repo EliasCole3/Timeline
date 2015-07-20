@@ -6,11 +6,19 @@
     <link rel="stylesheet" type="text/css" media="screen" href="css/css.css" />
     <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.css" />
     <link rel="stylesheet" type="text/css" media="screen" href="css/vis.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="css/dataTables.bootstrap.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="css/jquery.dynatable.css" />
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/jquery-ui.js"></script>
     <script type="text/javascript" src="js/moment.js"></script>
     <script type="text/javascript" src="js/vis.js"></script>
     <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/inflection.js"></script>
+    <script type="text/javascript" src="js/deepcopy.js"></script>
+    <script type="text/javascript" src="js/dataTables.js"></script>
+    <script type="text/javascript" src="js/dataTables.bootstrap.js"></script>
+    <script type="text/javascript" src="js/jquery.dynatable.js"></script>
     <script type="text/javascript" src="js/js.js"></script>
 
 </head>
@@ -35,6 +43,20 @@
 
 <div id="timeline"><img src='images/loading.gif' style='width:100px; height:100px;'></div>
 
+
+<table class="table compact" id="data-table">
+    <thead>
+        <tr>
+            <th>Event ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Details</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+</table>
  
 
    <div id="modal" class="modal fade">
