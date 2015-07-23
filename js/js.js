@@ -1,3 +1,6 @@
+(function() {
+  
+  
 $(function(){
   abc.initialize();
 });
@@ -11,10 +14,11 @@ Design
  - Layout
 
 Functionality
- - Datatable view of info and CRUD
  - All CRUD actions hooked up
  
 Other
+ - Dependency manager
+ - Explore DynaTable
 
 */
 
@@ -28,6 +32,8 @@ var abc = {
       abc.createTimeline();
       abc.createDynaTable();
       abc.assignHandlerEventReadButtons();
+      abc.assignHandlerEventUpdateButtons();
+      abc.assignHandlerEventDeleteButtons();
     });
     
   },
@@ -37,13 +43,25 @@ var abc = {
       var headerText = "Creating New Event";
       var formHtml = abc.getEventCreateForm();
       abc.showModal(headerText, formHtml);
-      abc.assignHandlerForEventCreateForm();
+      abc.assignHandlerEventCreateForm();
     });
   },
   
   assignHandlerEventReadButtons: function() {
     $(".model-read").click(function() {
-      console.log($(this).attr("name"));
+      console.log($(this).attr("event-id"));
+    });
+  },
+  
+  assignHandlerEventUpdateButtons: function() {
+    $(".model-update").click(function() {
+      console.log($(this).attr("event-id"));
+    });
+  },
+  
+  assignHandlerEventDeleteButtons: function() {
+    $(".model-delete").click(function() {
+      console.log($(this).attr("event-id"));
     });
   },
   
@@ -58,7 +76,7 @@ var abc = {
     return htmlString;
   },
   
-  assignHandlerForEventCreateForm: function() {
+  assignHandlerEventCreateForm: function() {
     
     $("#submit").click(function() {
       
@@ -115,7 +133,7 @@ var abc = {
   
   createGroups: function() {
     abc.timelineGroups = new vis.DataSet();
-    for (var i = 1; i < 10; i++) {
+    for (var i = 1; i <= 4; i++) {
       abc.timelineGroups.add({id: i, content: "group number " + i});
     }
   },
@@ -149,11 +167,12 @@ var abc = {
     data.forEach(function(event) {
       var htmlString = "";
       
-      htmlString = "<button class='btn btn-default model-delete' id='delete-" + event.eventId + "' name='delete-for-" + event.name + "'>" + 
+      htmlString = "" + 
+      "<button class='btn btn-default model-delete' id='delete-" + event.eventId + "' event-id='" + event.eventId + "'>" + 
       "<i class='glyphicon glyphicon-trash'></i> </button>" +
-      "<button class='btn btn-default model-update' id='update-" + event.eventId + "' name='update-for-" + event.name + "'>" +
+      "<button class='btn btn-default model-update' id='update-" + event.eventId + "' event-id='" + event.eventId + "'>" +
       "<i class='glyphicon glyphicon-edit'></i> </button>" +
-      "<button class='btn btn-default model-read' data-popup-target='#View-Popup' id='read-" + event.eventId + "' name='read-for-" + event.name + "'>" +
+      "<button class='btn btn-default model-read' data-popup-target='#View-Popup' id='read-" + event.eventId + "' event-id='" + event.eventId + "'>" +
       "<i class='glyphicon glyphicon-eye-open'></i> </button>";
    
       event["actions"] = htmlString;
@@ -260,3 +279,6 @@ var abc = {
 
 
 
+
+  
+})();

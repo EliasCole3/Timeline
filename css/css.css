@@ -3,5 +3,27 @@
 }
 
 body {
-/*   background-color: #A5CBFD !important; */
+  background-color: #54AFAF !important;
+}
+
+.wrapper {
+  width: 80%;
+  margin-top: 3%;
+  margin-left: 10%;
+  background-color: #F5F5F5;
+}
+
+.dynatable {
+  margin-top: 50px;  
+}
+
+.event-create-button {
+  width: 200px;
+  margin: 0 auto;
+}
+
+.event-create-button-wrapper {
+  width: 80%;
+  margin-left: 40%;
+  margin-bottom: 5%;
 }
