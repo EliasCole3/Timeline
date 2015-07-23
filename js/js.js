@@ -36,6 +36,8 @@ var abc = {
       abc.assignHandlerEventDeleteButtons();
     });
     
+    abc.loadTestData();
+    
   },
   
   assignHandlerEventCreateButton: function() {
@@ -196,6 +198,26 @@ var abc = {
     
   },
   
+  loadTestData: function() {
+    
+    var eventsToInsert = [];
+        
+    for(var i = 1; i <= 30; i++) {
+      var event = {
+        eventId: i,
+        name: "eventname" + i,
+        type: "type" + abc.getRandomInt(1,4),
+        startDate: "2015-07-0" + abc.getRandomInt(1,14),
+        endDate: "2015-07-0" + abc.getRandomInt(20,30),
+        details: "details" + i,
+      };
+      eventsToInsert.push(event);
+    }
+    
+    console.log(eventsToInsert);
+    
+  },
+  
   
   
   
@@ -213,6 +235,15 @@ var abc = {
         console.log(jqXHR);
       }
     });
+  },
+  
+    /**
+   * http://stackoverflow.com/questions/1527803/generating-random-numbers-in-javascript-in-a-specific-range
+   * Returns a random integer between min (inclusive) and max (inclusive)
+   * Using Math.round() will give you a non-uniform distribution!
+   */
+  getRandomInt: function(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
   },
 
   
