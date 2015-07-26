@@ -1,8 +1,8 @@
 (function() {
   
-  
 $(function(){
   abc.initialize();
+  // ebot.updateDocumentation(abc);
 });
 
 
@@ -19,9 +19,34 @@ Functionality
 Other
  - Dependency manager
  - Explore DynaTable
+ - Clean up server.js
 
 */
 
+/**
+ * initialize()
+ * assignHandlerEventCreateButton()
+ * assignHandlerEventReadButtons()
+ * assignHandlerEventUpdateButtons()
+ * assignHandlerEventDeleteButtons()
+ * getEventCreateForm()
+ * getEventUpdateForm()
+ * assignHandlersEventCreateForm()
+ * assignHandlersEventUpdateForm()
+ * showModal()
+ * createTimeline()
+ * createGroups()
+ * createItems()
+ * createDynaTable()
+ * retrieveEvents()
+ * getRandomInt()
+ * timeline
+ * events
+ * apiurl
+ * timelineOptions
+ * timelineGroups
+ * timelineItems
+ */
 var abc = {
     
   initialize: function() {
@@ -36,8 +61,6 @@ var abc = {
       abc.assignHandlerEventDeleteButtons();
     });
     
-    abc.loadTestData();
-    
   },
   
   assignHandlerEventCreateButton: function() {
@@ -45,7 +68,7 @@ var abc = {
       var headerText = "Creating New Event";
       var formHtml = abc.getEventCreateForm();
       abc.showModal(headerText, formHtml);
-      abc.assignHandlerEventCreateForm();
+      abc.assignHandlersEventCreateForm();
     });
   },
   
@@ -57,7 +80,19 @@ var abc = {
   
   assignHandlerEventUpdateButtons: function() {
     $(".model-update").click(function() {
-      console.log($(this).attr("event-id"));
+      // console.log($(this).attr("event-id"));
+      
+      var eventId = +$(this).attr("event-id");
+      
+      var event = abc.events.filter(function(event) {
+        return event.eventId === eventId;
+      })[0]; 
+      
+      var headerText = "Updating Event: " + event.name;
+      var formHtml = abc.getEventUpdateForm();
+      abc.showModal(headerText, formHtml);
+      abc.assignHandlersEventUpdateForm(event);
+      
     });
   },
   
@@ -73,12 +108,23 @@ var abc = {
       "<label>Type</label><input id='type' type='text' class='form-control' /><br />" + 
       "<label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />" + 
       "<label>End Date</label><input id='end-date' type='date' class='form-control' /><br />" + 
-      "<label>Details</label><textarea id='start-date' class='form-control' style='resize:vertical;' ></textarea><br />" + 
+      "<label>Details</label><textarea id='start-date' class='form-control' ></textarea><br />" + 
+      "<button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>";
+    return htmlString;
+  },
+
+  getEventUpdateForm: function() {
+    var htmlString = "" + 
+      "<label>Name</label><input id='name' type='text' class='form-control' /><br />" + 
+      "<label>Type</label><input id='type' type='text' class='form-control' /><br />" + 
+      "<label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />" + 
+      "<label>End Date</label><input id='end-date' type='date' class='form-control' /><br />" + 
+      "<label>Details</label><textarea id='start-date' class='form-control' ></textarea><br />" + 
       "<button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>";
     return htmlString;
   },
   
-  assignHandlerEventCreateForm: function() {
+  assignHandlersEventCreateForm: function() {
     
     $("#submit").click(function() {
       
@@ -99,6 +145,52 @@ var abc = {
       $.ajax({
         type: "POST",
         url: abc.apiurl,
+        data: dataForAjax,
+        contentType: "application/json; charset=utf-8",
+        success: function(data, status, jqXHR) {
+          $("#modal").modal("hide");
+          console.log(data);
+        },
+        error: function(jqXHR, status) {
+          console.log("error");
+          console.log(jqXHR);
+        }
+      });
+      
+    });
+    
+  },
+  
+  assignHandlersEventUpdateForm: function(oldEvent) {
+    
+    //get old data and fill form
+    $("#name").val(oldEvent.name);
+    $("#type").val(oldEvent.type);
+    $("#start-date").val(oldEvent.startDate);
+    $("#end-date").val(oldEvent.endDate);
+    $("#details").val(oldEvent.details);
+    
+    $("#submit").click(function() {
+
+      var mongoId = oldEvent._id;
+      var name = $("#name").val();
+      var type = $("#type").val();
+      var startDate = $("#start-date").val();
+      var endDate = $("#end-date").val();
+      var details = $("#details").val();
+      
+      var dataForAjax = JSON.stringify({
+        "_id" : mongoId,
+        "name" : name,
+        "type" : type,
+        "startDate" : startDate,
+        "endDate" : endDate,
+        "details" : details,
+      });
+      
+      $.ajax({
+        type: "PUT",
+        url: abc.apiurl + "/" + oldEvent._id,
         data: dataForAjax,
         contentType: "application/json; charset=utf-8",
         success: function(data, status, jqXHR) {
@@ -181,55 +273,28 @@ var abc = {
       
     });
 
-      $("#dynatable").dynatable({
-        dataset: {
-          // records: abc.events
-          records: data
-        },
-        features: {
-          paginate: true,
-          recordCount: true,
-          sorting: true,
-          search: true
-        },
-      });
+    $("#dynatable").dynatable({
+      dataset: {
+        // records: abc.events
+        records: data
+      },
+      features: {
+        paginate: true,
+        recordCount: true,
+        sorting: true,
+        search: true
+      },
+    });
 
-      console.log(data);
-    
   },
-  
-  loadTestData: function() {
-    
-    var eventsToInsert = [];
-        
-    for(var i = 1; i <= 30; i++) {
-      var event = {
-        eventId: i,
-        name: "eventname" + i,
-        type: "type" + abc.getRandomInt(1,4),
-        startDate: "2015-07-0" + abc.getRandomInt(1,14),
-        endDate: "2015-07-0" + abc.getRandomInt(20,30),
-        details: "details" + i,
-      };
-      eventsToInsert.push(event);
-    }
-    
-    console.log(eventsToInsert);
-    
-  },
-  
-  
-  
-  
-  
   
   retrieveEvents: function() {
     return $.ajax({
       type: "GET",
       url: abc.apiurl,
       success: function(data, status, jqXHR) {
-        console.log(data);
         abc.events = data;
+        // console.log(abc.events);
       },
       error: function(jqXHR, status) {
         console.log(jqXHR);
@@ -254,7 +319,7 @@ var abc = {
   apiurl: "http://localhost:8081/api/events",
   
   timelineOptions: {
-        maxHeight: "2000px", 
+        maxHeight: "400px", 
         min: "2010-01-01",
         max: "2020-01-01",
         editable: {updateGroup: true},
@@ -268,45 +333,6 @@ var abc = {
   
   
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -9,6 +9,8 @@ var app = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var url = "mongodb://localhost:27017/timeline";
 var mongoClient = require("mongodb").MongoClient;
+var fs = require('fs');
+var stringy = require('stringy');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -100,10 +102,12 @@ router.route('/events/:event_id')
   })
   
   .put(function(req, res) {
-
-      Event.findById(req.params.event_id, function(err, event) {
+      
+      // Event.findById(req.params.event_id, function(err, event) { //get the info from the url
+      Event.findById(req.body._id, function(err, event) { //get the info from the body of the request
 
           if(err) {
+            err["extra"] = "first error";
             res.send(err);
           }
 
@@ -115,10 +119,15 @@ router.route('/events/:event_id')
 
           event.save(function(err) {
               if(err) {
+                err["extra"] = "second error";
                 res.send(err);
               }
 
-              res.json({ message: 'Event updated!' });
+              res.json({ message: 'Event updated!' , newObj: event});
+              // res.send({"req": req, "res": res});
+              // res.send(JSON.parse(stringy.stringify(req))); //works
+              // res.send(req.body);
+              // res.send(req.headers);
           });
 
       });
