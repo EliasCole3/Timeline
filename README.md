@@ -1,2 +1,2 @@
 # Timeline
-A simple timeline app to track and show life events. 
+A simple timeline app to track, show, and filter events. 

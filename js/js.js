@@ -15,11 +15,15 @@ Design
 
 Functionality
  - All CRUD actions hooked up
+ - Reset everything after CRUD
  
 Other
  - Dependency manager
  - Explore DynaTable
  - Clean up server.js
+ 
+ Bugs
+ - DynaTable search disables RUD button handlers...
 
 */
 
@@ -98,7 +102,19 @@ var abc = {
   
   assignHandlerEventDeleteButtons: function() {
     $(".model-delete").click(function() {
-      console.log($(this).attr("event-id"));
+      // console.log($(this).attr("event-id"));
+      
+      var eventId = +$(this).attr("event-id");
+      
+      var event = abc.events.filter(function(event) {
+        return event.eventId === eventId;
+      })[0]; 
+      
+      var headerText = "Are you sure you want to delete event: " + event.name + "?";
+      var formHtml = abc.getEventDeleteForm();
+      abc.showModal(headerText, formHtml);
+      abc.assignHandlersEventDeleteForm(event);
+      
     });
   },
   
@@ -108,7 +124,7 @@ var abc = {
       "<label>Type</label><input id='type' type='text' class='form-control' /><br />" + 
       "<label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />" + 
       "<label>End Date</label><input id='end-date' type='date' class='form-control' /><br />" + 
-      "<label>Details</label><textarea id='start-date' class='form-control' ></textarea><br />" + 
+      "<label>Details</label><textarea id='details' class='form-control' ></textarea><br />" + 
       "<button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>";
     return htmlString;
   },
@@ -119,7 +135,13 @@ var abc = {
       "<label>Type</label><input id='type' type='text' class='form-control' /><br />" + 
       "<label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />" + 
       "<label>End Date</label><input id='end-date' type='date' class='form-control' /><br />" + 
-      "<label>Details</label><textarea id='start-date' class='form-control' ></textarea><br />" + 
+      "<label>Details</label><textarea id='details' class='form-control' ></textarea><br />" + 
+      "<button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>";
+    return htmlString;
+  },
+
+  getEventDeleteForm: function() {
+    var htmlString = "" + 
       "<button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>";
     return htmlString;
   },
@@ -193,6 +215,28 @@ var abc = {
         url: abc.apiurl + "/" + oldEvent._id,
         data: dataForAjax,
         contentType: "application/json; charset=utf-8",
+        success: function(data, status, jqXHR) {
+          $("#modal").modal("hide");
+          console.log(data);
+        },
+        error: function(jqXHR, status) {
+          console.log("error");
+          console.log(jqXHR);
+        }
+      });
+      
+    });
+    
+  },
+  
+
+  assignHandlersEventDeleteForm: function(event) {
+    
+    $("#submit").click(function() {
+
+      $.ajax({
+        type: "DELETE",
+        url: abc.apiurl + "/" + event._id,
         success: function(data, status, jqXHR) {
           $("#modal").modal("hide");
           console.log(data);
