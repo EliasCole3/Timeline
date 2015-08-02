@@ -1,6 +1,6 @@
 (function() {
   
-$(function(){
+$(function() {
   abc.initialize();
   // ebot.updateDocumentation(abc);
 });
@@ -14,13 +14,15 @@ Design
  - Layout
 
 Functionality
- - All CRUD actions hooked up
  - Reset everything after CRUD
+ - Timeline filtering
+ - Timeline controls
  
 Other
  - Dependency manager
  - Explore DynaTable
  - Clean up server.js
+ - Hotkeys
  
  Bugs
  - DynaTable search disables RUD button handlers...
@@ -29,60 +31,83 @@ Other
 
 /**
  * initialize()
+ * reset()
+ * assignHandlersRUDButtons()
  * assignHandlerEventCreateButton()
- * assignHandlerEventReadButtons()
- * assignHandlerEventUpdateButtons()
- * assignHandlerEventDeleteButtons()
+ * assignHandlersEventReadButtons()
+ * assignHandlersEventUpdateButtons()
+ * assignHandlersEventDeleteButtons()
  * getEventCreateForm()
  * getEventUpdateForm()
+ * getEventDeleteForm()
  * assignHandlersEventCreateForm()
  * assignHandlersEventUpdateForm()
- * showModal()
+ * assignHandlersEventDeleteForm()
+ * assignStackToggleHandler()
+ * assignRedrawHandler()
+ * fillTimelineFilterSelect()
  * createTimeline()
  * createGroups()
  * createItems()
  * createDynaTable()
+ * resetDynaTableHtml()
  * retrieveEvents()
  * getRandomInt()
  * timeline
  * events
  * apiurl
- * timelineOptions
+ * getTimelineOptions()
  * timelineGroups
  * timelineItems
+ * dynaTable
+ * isStacked
+ * timelineMinHeight
+ * timelineMaxHeight
  */
 var abc = {
     
   initialize: function() {
     
     abc.assignHandlerEventCreateButton();
+    abc.reset();
+    abc.assignStackToggleHandler();
+    abc.assignRedrawHandler();
     
+  },
+  
+  reset: function() {
     abc.retrieveEvents().then(function() {
       abc.createTimeline();
+      abc.resetDynaTableHtml();
       abc.createDynaTable();
-      abc.assignHandlerEventReadButtons();
-      abc.assignHandlerEventUpdateButtons();
-      abc.assignHandlerEventDeleteButtons();
+      abc.assignHandlersRUDButtons();
+      abc.fillTimelineFilterSelect();
+      abc.isPageLoad = false;
     });
-    
+  },
+  
+  assignHandlersRUDButtons: function() {
+    abc.assignHandlersEventReadButtons();
+    abc.assignHandlersEventUpdateButtons();
+    abc.assignHandlersEventDeleteButtons();
   },
   
   assignHandlerEventCreateButton: function() {
     $("#event-create-button").click(function() {
       var headerText = "Creating New Event";
       var formHtml = abc.getEventCreateForm();
-      abc.showModal(headerText, formHtml);
+      ebot.showModal(headerText, formHtml);
       abc.assignHandlersEventCreateForm();
     });
   },
   
-  assignHandlerEventReadButtons: function() {
+  assignHandlersEventReadButtons: function() {
     $(".model-read").click(function() {
       console.log($(this).attr("event-id"));
     });
   },
   
-  assignHandlerEventUpdateButtons: function() {
+  assignHandlersEventUpdateButtons: function() {
     $(".model-update").click(function() {
       // console.log($(this).attr("event-id"));
       
@@ -94,13 +119,13 @@ var abc = {
       
       var headerText = "Updating Event: " + event.name;
       var formHtml = abc.getEventUpdateForm();
-      abc.showModal(headerText, formHtml);
+      ebot.showModal(headerText, formHtml);
       abc.assignHandlersEventUpdateForm(event);
       
     });
   },
   
-  assignHandlerEventDeleteButtons: function() {
+  assignHandlersEventDeleteButtons: function() {
     $(".model-delete").click(function() {
       // console.log($(this).attr("event-id"));
       
@@ -112,7 +137,7 @@ var abc = {
       
       var headerText = "Are you sure you want to delete event: " + event.name + "?";
       var formHtml = abc.getEventDeleteForm();
-      abc.showModal(headerText, formHtml);
+      ebot.showModal(headerText, formHtml);
       abc.assignHandlersEventDeleteForm(event);
       
     });
@@ -142,7 +167,7 @@ var abc = {
 
   getEventDeleteForm: function() {
     var htmlString = "" + 
-      "<button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>";
+      "<button id='submit' class='btn btn-lg form-control' type='submit'>Yes</button>";
     return htmlString;
   },
   
@@ -172,6 +197,7 @@ var abc = {
         success: function(data, status, jqXHR) {
           $("#modal").modal("hide");
           console.log(data);
+          abc.reset();
         },
         error: function(jqXHR, status) {
           console.log("error");
@@ -217,7 +243,8 @@ var abc = {
         contentType: "application/json; charset=utf-8",
         success: function(data, status, jqXHR) {
           $("#modal").modal("hide");
-          console.log(data);
+          abc.reset();
+          // abc.dynaTable.records.updateFromJson(abc.events);
         },
         error: function(jqXHR, status) {
           console.log("error");
@@ -240,6 +267,7 @@ var abc = {
         success: function(data, status, jqXHR) {
           $("#modal").modal("hide");
           console.log(data);
+          abc.reset();
         },
         error: function(jqXHR, status) {
           console.log("error");
@@ -251,18 +279,91 @@ var abc = {
     
   },
   
-  showModal: function(headerText, formHtml) {
-    $("#error-message-div").addClass("hide");
-    $("#form-target").html(formHtml);
-    $("#modal-header").html("<h4>" + headerText + "</h4>");
-    $("#modal").modal("show");
+  assignStackToggleHandler: function() {
+    
+    $("#stack-option").click(function() {
+      var today = new Date();
+      today = moment(today);
+      abc.isStacked ? abc.isStacked = false : abc.isStacked = true;
+      var options = {
+        maxHeight: "400px", 
+        min: "2010-1-1",
+        max: today,
+        editable: {updateGroup: true},
+        orientation: "both",
+        stack: abc.isStacked,
+      };
+      abc.timeline.setOptions(options);
+      abc.timeline.redraw();
+    });
+    
+  },
+  
+  assignRedrawHandler: function() {
+    
+    $("#redraw").click(function() {
+      var today = new Date();
+      today = moment(today);
+      monthAgo = new Date();
+      monthAgo.setMonth(monthAgo.getMonth()-1);
+      
+      var startRange = $("#range-start").val();
+      var endRange = $("#range-end").val();
+      var height = $("#height").val();
+
+      if(startRange === "") {
+        startRange = monthAgo;
+      }
+      if(endRange === "") {
+        endRange = today;
+      }
+
+      if(height < abc.timelineMinHeight || height > abc.timelineMaxHeight) {
+        height = 700;
+        ebot.notify("Please choose a height between " + abc.timelineMinHeight + " and " + abc.timelineMaxHeight + "", 5000);
+      }
+      height = height + "px";
+      var options = {
+        height: height, 
+        min: "2010-1-1",
+        max: today,
+        editable: {updateGroup: true},
+        orientation: "both",
+        stack: abc.isStacked,
+      };
+      abc.timeline.setOptions(options);
+      abc.timeline.redraw();
+      abc.timeline.setWindow(startRange, endRange);
+    });
+    
+  },
+  
+  fillTimelineFilterSelect: function() {
+
+    //this wasn't allowing chosen to be activated the first time.
+    if(!abc.isPageLoad) {
+      $("#timeline-filter-select").chosen("destroy");
+    }
+    
+    var htmlString = "<option value=''></option>";
+    
+    var uniqueEventTypes = ebot.getUniqueFields(abc.events, "type");
+    
+    uniqueEventTypes.sort();
+    
+    uniqueEventTypes.forEach(function(eventType) {
+      htmlString += "<option value='" + eventType + "'>" + eventType + "</option>";
+    });
+    
+    $("#timeline-filter-select").html(htmlString);
+    $("#timeline-filter-select").chosen(ebot.chosenOptions);
   },
   
   createTimeline: function() {
     $("#timeline").html("");
     var container = document.getElementById("timeline");
     abc.timeline = new vis.Timeline(container);
-    abc.timeline.setOptions(abc.timelineOptions);
+    abc.timeline.setOptions(abc.getTimelineOptions());
     abc.createGroups();
     abc.timeline.setGroups(abc.timelineGroups);
     abc.createItems();
@@ -330,6 +431,46 @@ var abc = {
       },
     });
 
+    // $("#dynatable").dynatable({
+      // dataset: {
+        // ajax: true,
+        // ajaxUrl: abc.apiurl,
+        // ajaxOnLoad: true,
+        // records: []
+      // },
+      // features: {
+        // paginate: true,
+        // recordCount: true,
+        // sorting: true,
+        // search: true
+      // },
+    // });
+    
+    abc.dynaTable = $('#dynatable').data('dynatable');
+
+  },
+  
+  resetDynaTableHtml: function() {
+    
+    $(".dynatable-wrapper").empty();
+    
+    var htmlString = "" + 
+"<table class='table compact dynatable' id='dynatable'>" + 
+"    <thead>" + 
+"        <tr>" + 
+"            <th>Event ID</th>" + 
+"            <th>Name</th>" + 
+"            <th>Type</th>" + 
+"            <th>Start Date</th>" + 
+"            <th>End Date</th>" + 
+"            <th>Details</th>" + 
+"            <th>Actions</th>" + 
+"        </tr>" + 
+"    </thead>" + 
+"</table>";
+
+    $(".dynatable-wrapper").append(htmlString);
+
   },
   
   retrieveEvents: function() {
@@ -346,7 +487,7 @@ var abc = {
     });
   },
   
-    /**
+  /**
    * http://stackoverflow.com/questions/1527803/generating-random-numbers-in-javascript-in-a-specific-range
    * Returns a random integer between min (inclusive) and max (inclusive)
    * Using Math.round() will give you a non-uniform distribution!
@@ -355,28 +496,42 @@ var abc = {
       return Math.floor(Math.random() * (max - min + 1)) + min;
   },
 
-  
   timeline: "",
 
   events: [],
   
   apiurl: "http://localhost:8081/api/events",
-  
-  timelineOptions: {
-        maxHeight: "400px", 
-        min: "2010-01-01",
-        max: "2020-01-01",
-        editable: {updateGroup: true},
-        start: "2015-06-01",
+
+  getTimelineOptions: function() { //this has to be a function because it references one of it's own properties
+    return {
+      maxHeight: abc.timelineMaxHeight, 
+      height: "400px",
+      min: "2010-01-01",
+      max: "2020-01-01",
+      editable: {updateGroup: true},
+      start: "2015-06-28",
+      end: "2015-07-10",
+      orientation: "both",
+    };
   },
   
   timelineGroups: "",
   
   timelineItems: [],
   
+  dynaTable: {},
   
+  isStacked: true,
+  
+  timelineMinHeight: 200,
+  
+  timelineMaxHeight: 2000,
+  
+  isPageLoad: true,
   
 };
+
+
 
 
 

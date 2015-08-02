@@ -103,11 +103,13 @@ var ebot = {
     
     var responseText = JSON.parse(jqXHR.responseText);
     
-    $.each(responseText.validation_messages, function(index, element) {
-      var indexPretty = index.replace("_id", ""); 
-      indexPretty = indexPretty.replace(/_/g, " "); 
-      $("#error-message-status-text").append("<br />" + indexPretty + ": " + "'" + element + "'");
-    });
+    if(typeof(responseText.validation_messages) !== "undefined") {
+      $.each(responseText.validation_messages, function(index, element) {
+        var indexPretty = index.replace("_id", ""); 
+        indexPretty = indexPretty.replace(/_/g, " "); 
+        $("#error-message-status-text").append("<br />" + indexPretty + ": " + "'" + element + "'");
+      });
+    }
     
     $("#error-message-div").removeClass("hide");
   },
@@ -127,13 +129,28 @@ var ebot = {
    * 
    */
   notify: function(message, hideTime) {
-    if(typeof(hideTime) === "undefined") hideTime = 3000;
-    htmlString = "<label>" + message + "</label>";
-    $("#notifications").html(htmlString);
-    $("#notifications").show(abc.showOptions);
+    
+    if(typeof(hideTime) !== "undefined") {
+      hideTime = +hideTime;
+    } else {
+      hideTime = 3000;
+    }
+    
+    $("#notifications").show(); //necessary?
+
+    var rand = ebot.getRandomInt(0, 999999);
+    htmlString = "<div id='falling-cherry-blossom-" + rand + "' style='display:hidden;'><label>" + message + "</label><br /></div>";
+    $("#notifications").append(htmlString);
+    $("#falling-cherry-blossom-" + rand).show(ebot.showOptions);
+    
     setTimeout(function() {
-      $("#notifications").hide(abc.hideOptions);
+      $("#falling-cherry-blossom-" + rand).hide(ebot.hideOptions);
     }, hideTime);
+
+    setTimeout(function() {
+      $("#falling-cherry-blossom-" + rand).remove();
+    }, hideTime + 500);
+
   },
   
   //getting unique fields from one property given an array of objects
@@ -198,6 +215,14 @@ var ebot = {
     "</div><!-- /.modal -->";
     
     $("#modal-holder").html(htmlString);
+  },
+  
+  /**
+   *  Returns a random integer between min (inclusive) and max (inclusive) 
+   *  Using Math.round() will give you a non-uniform distribution! 
+   */ 
+  getRandomInt: function(min, max) { 
+    return Math.floor(Math.random() * (max - min + 1)) + min; 
   },
   
   chosenOptions: {

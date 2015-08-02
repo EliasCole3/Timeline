@@ -31,3 +31,15 @@ body {
 textarea {
   resize: vertical;
 }
+
+#notifications {
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
+  text-align: center;
+  height: 20px;
+}
+
+#timeline-filter-select {
+  width: 200px;
+}

@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="css/jquery.dataTables.min.css" />
     <link rel="stylesheet" type="text/css" media="screen" href="css/dataTables.bootstrap.css" />
     <link rel="stylesheet" type="text/css" media="screen" href="css/jquery.dynatable.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="css/chosen.min.css" />
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/jquery-ui.js"></script>
     <script type="text/javascript" src="js/moment.js"></script>
@@ -20,50 +21,56 @@
     <script type="text/javascript" src="js/dataTables.bootstrap.js"></script>
     <script type="text/javascript" src="js/jquery.dynatable.js"></script>
     <script type="text/javascript" src="js/ebot.js"></script>
+    <script type="text/javascript" src="js/chosen.jquery.js"></script>
     <script type="text/javascript" src="js/js.js"></script>
 
 </head>
 <body>
 
-
-<!-- <button id="StackOption"><i class="btn btn-lg">StackToggle</i></button>
-
-<label>Range Start: </label>
-<input id="RangeStart" type="date" />
-
-<label>Range End: </label>
-<input id="RangeEnd" type="date" />
-
-<label>Height: </label>
-<input id="Height" type="number" />
-
-<button id="Redraw" style="float:right;"><i class="btn btn-lg">Redraw</i></button>
- -->
-
 <div class="wrapper">
+
+<div id="notifications"></div>
 
     <div class="event-create-button-wrapper">
         <button id="event-create-button" class="btn btn-lg event-create-button">Create New Event</button>
     </div>
     
+    
+    <div class="timeline-controls">
+        <button id="stack-option"><i class="btn btn-lg">StackToggle</i></button>
+                
+        <label>Range Start: </label>
+        <input id="range-start" type="date" />
 
+        <label>Range End: </label>
+        <input id="range-end" type="date" />
+
+        <label>Height: </label>
+        <input id="height" type="number" />
+        
+        <select id="timeline-filter-select" data-placeholder="Select event type..."></select>
+
+        <button id="redraw" style="float:right;"><i class="btn btn-lg">Redraw</i></button>
+    </div>
 
     <div id="timeline"><img src='images/loading.gif' style='width:100px; height:100px;'></div>
 
 
-    <table class="table compact dynatable" id="dynatable">
-        <thead>
-            <tr>
-                <th>Event ID</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Details</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-    </table>
+    <div class="dynatable-wrapper">
+        <!-- <table class="table compact dynatable" id="dynatable">
+            <thead>
+                <tr>
+                    <th>Event ID</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Details</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+        </table> -->
+    </div>
  
 </div>
  
