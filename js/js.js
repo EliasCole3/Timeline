@@ -52,7 +52,6 @@ Other
  * createDynaTable()
  * resetDynaTableHtml()
  * retrieveEvents()
- * getRandomInt()
  * timeline
  * events
  * apiurl
@@ -109,7 +108,6 @@ var abc = {
   
   assignHandlersEventUpdateButtons: function() {
     $(".model-update").click(function() {
-      // console.log($(this).attr("event-id"));
       
       var eventId = +$(this).attr("event-id");
       
@@ -127,7 +125,6 @@ var abc = {
   
   assignHandlersEventDeleteButtons: function() {
     $(".model-delete").click(function() {
-      // console.log($(this).attr("event-id"));
       
       var eventId = +$(this).attr("event-id");
       
@@ -395,10 +392,6 @@ var abc = {
     });
   },
   
-  
-  
-  
-  
   createDynaTable: function() {
 
     var data = deepcopy(abc.events);
@@ -420,7 +413,6 @@ var abc = {
 
     $("#dynatable").dynatable({
       dataset: {
-        // records: abc.events
         records: data
       },
       features: {
@@ -430,21 +422,6 @@ var abc = {
         search: true
       },
     });
-
-    // $("#dynatable").dynatable({
-      // dataset: {
-        // ajax: true,
-        // ajaxUrl: abc.apiurl,
-        // ajaxOnLoad: true,
-        // records: []
-      // },
-      // features: {
-        // paginate: true,
-        // recordCount: true,
-        // sorting: true,
-        // search: true
-      // },
-    // });
     
     abc.dynaTable = $('#dynatable').data('dynatable');
 
@@ -479,21 +456,11 @@ var abc = {
       url: abc.apiurl,
       success: function(data, status, jqXHR) {
         abc.events = data;
-        // console.log(abc.events);
       },
       error: function(jqXHR, status) {
         console.log(jqXHR);
       }
     });
-  },
-  
-  /**
-   * http://stackoverflow.com/questions/1527803/generating-random-numbers-in-javascript-in-a-specific-range
-   * Returns a random integer between min (inclusive) and max (inclusive)
-   * Using Math.round() will give you a non-uniform distribution!
-   */
-  getRandomInt: function(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
   },
 
   timeline: "",
