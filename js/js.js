@@ -14,9 +14,7 @@ Design
  - Layout
 
 Functionality
- - Reset everything after CRUD
  - Timeline filtering
- - Timeline controls
  
 Other
  - Dependency manager
@@ -307,19 +305,23 @@ var abc = {
       var startRange = $("#range-start").val();
       var endRange = $("#range-end").val();
       var height = $("#height").val();
+      abc.filterTimelineItems();
 
       if(startRange === "") {
         startRange = monthAgo;
       }
+      
       if(endRange === "") {
         endRange = today;
       }
 
       if(height < abc.timelineMinHeight || height > abc.timelineMaxHeight) {
-        height = 700;
+        height = 400;
         ebot.notify("Please choose a height between " + abc.timelineMinHeight + " and " + abc.timelineMaxHeight + "", 5000);
       }
+      
       height = height + "px";
+      
       var options = {
         height: height, 
         min: "2010-1-1",
@@ -328,6 +330,8 @@ var abc = {
         orientation: "both",
         stack: abc.isStacked,
       };
+      
+      abc.timeline.setItems(abc.timelineItems);
       abc.timeline.setOptions(options);
       abc.timeline.redraw();
       abc.timeline.setWindow(startRange, endRange);
@@ -363,7 +367,7 @@ var abc = {
     abc.timeline.setOptions(abc.getTimelineOptions());
     abc.createGroups();
     abc.timeline.setGroups(abc.timelineGroups);
-    abc.createItems();
+    abc.createTimelineItems();
     abc.timeline.setItems(abc.timelineItems);
   },
   
@@ -374,21 +378,46 @@ var abc = {
     }
   },
 
-  createItems: function() {
+  createTimelineItems: function() {
     
     abc.timelineItems = new vis.DataSet();
     
     abc.events.forEach(function(event) {
+      abc.addTimelineItem(event);
+    });
+    
+  },
+  
+  filterTimelineItems: function() {
+     abc.timelineItems = new vis.DataSet();
+    
+    var typeToFilterBy = $("#timeline-filter-select").val();
+
+    abc.events.forEach(function(event) {
       
-      abc.timelineItems.add({
-        id: event.eventId,
-        group: 1,
-        content: event.name,
-        start: moment(event.startDate),
-        // end: moment(event.startDate),
-        type: "box"
-      });
+      console.log(typeToFilterBy);
+      console.log(event.type);
+      console.log("-----------");
       
+      if(typeToFilterBy === null) {
+        abc.addTimelineItem(event);
+      } else if(typeToFilterBy === event.type) {
+        abc.addTimelineItem(event);
+      } else {
+        // console.log("error");
+      }
+      
+    });
+  },
+  
+  addTimelineItem: function(event) {
+    abc.timelineItems.add({
+      id: event.eventId,
+      group: 1,
+      content: event.name,
+      start: moment(event.startDate),
+      // end: moment(event.startDate),
+      type: "box"
     });
   },
   
