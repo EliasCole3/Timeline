@@ -394,17 +394,13 @@ var abc = {
     var typeToFilterBy = $("#timeline-filter-select").val();
 
     abc.events.forEach(function(event) {
-      
-      console.log(typeToFilterBy);
-      console.log(event.type);
-      console.log("-----------");
-      
-      if(typeToFilterBy === null) {
+
+      if(typeToFilterBy === null || typeToFilterBy === "") { //null on page load, empty string after the select element is filled
         abc.addTimelineItem(event);
       } else if(typeToFilterBy === event.type) {
         abc.addTimelineItem(event);
       } else {
-        // console.log("error");
+        // console.log("Event not added, didn't match type");
       }
       
     });
