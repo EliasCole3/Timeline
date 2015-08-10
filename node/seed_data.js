@@ -22,8 +22,8 @@ var insertDocuments = function(db, callback) {
       eventId: i,
       name: "eventname" + i,
       type: "type" + abc.getRandomInt(1,4),
-      startDate: "2015-07-0" + abc.getRandomInt(1,9),
-      endDate: "2015-07-" + abc.getRandomInt(20,30),
+      startDate: "2015-08-0" + abc.getRandomInt(1,9),
+      endDate: "2015-08-" + abc.getRandomInt(20,30),
       details: "details" + i,
     };
     eventsToInsert.push(event);

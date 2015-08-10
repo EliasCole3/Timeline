@@ -35,29 +35,45 @@
         <button id="event-create-button" class="btn btn-lg event-create-button">Create New Event</button>
     </div>
     
-    
-    <div class="timeline-controls">
-        <button id="stack-option"><i class="btn btn-lg">StackToggle</i></button>
-                
-        <label>Range Start: </label>
-        <input id="range-start" type="date" />
-
-        <label>Range End: </label>
-        <input id="range-end" type="date" />
-
-        <label>Height: </label>
-        <input id="height" type="number" />
-        
-        <select id="timeline-filter-select" data-placeholder="Select event type..."></select>
-
-        <button id="redraw" style="float:right;"><i class="btn btn-lg">Redraw</i></button>
+    <div id="actions-wrapper" class="">
+        <div id="actions" class="">
+            <button id="read" class="btn btn-lg">Details</button>
+            <button id="update" class="btn btn-lg">Update</button>
+            <button id="delete" class="btn btn-lg">Delete</button>
+        </div>
     </div>
-
+    
     <div id="timeline"><img src='images/loading.gif' style='width:100px; height:100px;'></div>
+    
+    <div id="timeline-controls">
+    
+        <div class="timeline-control-wrapper center-vertical">
+            <button id="stack-option" class="timeline-control"><i class="btn btn-sm">Stack</i></button>
+        </div>
+            
+         <div class="timeline-control-wrapper">
+             <label>Start Date</label> <br />
+             <input id="range-start" type="date" class="form-control timeline-control" />
+         </div>
 
+         <div class="timeline-control-wrapper">
+            <label>End Date</label> <br />
+            <input id="range-end" type="date" class="form-control timeline-control" />
+         </div>
 
-    <div class="dynatable-wrapper"></div>
- 
+         <div class="timeline-control-wrapper">
+            <label>Timeline Height</label> <br />
+            <input id="height" type="number" class="form-control timeline-control" step="50" />
+         </div>
+
+         <div class="timeline-control-wrapper center-vertical">
+            <select id="timeline-filter-select" data-placeholder="Select event type..." class="timeline-control"></select>
+         </div>
+
+    </div>
+    
+    <div class="clear-float"></div>
+    
 </div>
  
  

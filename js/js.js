@@ -7,7 +7,7 @@ $(function() {
 
 
 /*
-To do 
+To do
 
 Design
  - Color scheme
@@ -30,11 +30,10 @@ Other
 /**
  * initialize()
  * reset()
- * assignHandlersRUDButtons()
  * assignHandlerEventCreateButton()
- * assignHandlersEventReadButtons()
- * assignHandlersEventUpdateButtons()
- * assignHandlersEventDeleteButtons()
+ * assignHandlersRUD()
+ * getEventReadForm()
+ * assignHandlersEventReadForm()
  * getEventCreateForm()
  * getEventUpdateForm()
  * getEventDeleteForm()
@@ -45,10 +44,11 @@ Other
  * assignRedrawHandler()
  * fillTimelineFilterSelect()
  * createTimeline()
+ * assignHandlersForTimeline()
  * createGroups()
- * createItems()
- * createDynaTable()
- * resetDynaTableHtml()
+ * createTimelineItems()
+ * filterTimelineItems()
+ * addTimelineItem()
  * retrieveEvents()
  * timeline
  * events
@@ -60,6 +60,9 @@ Other
  * isStacked
  * timelineMinHeight
  * timelineMaxHeight
+ * isPageLoad
+ * selectedEventId
+ * rudActionsVisible
  */
 var abc = {
     
@@ -69,73 +72,92 @@ var abc = {
     abc.reset();
     abc.assignStackToggleHandler();
     abc.assignRedrawHandler();
+    abc.assignHandlersRUD();
+    abc.assignHandlersTimelineControls();
     
   },
   
   reset: function() {
+    
     abc.retrieveEvents().then(function() {
       abc.createTimeline();
-      abc.resetDynaTableHtml();
-      abc.createDynaTable();
-      abc.assignHandlersRUDButtons();
+      abc.assignHandlersForTimeline();
       abc.fillTimelineFilterSelect();
       abc.isPageLoad = false;
     });
+    
   },
   
-  assignHandlersRUDButtons: function() {
-    abc.assignHandlersEventReadButtons();
-    abc.assignHandlersEventUpdateButtons();
-    abc.assignHandlersEventDeleteButtons();
+  assignHandlersTimelineControls: function() {
+    
+    $(".timeline-control").change(function() {
+      abc.redrawTimeline();
+    });
+    
   },
   
   assignHandlerEventCreateButton: function() {
+    
     $("#event-create-button").click(function() {
       var headerText = "Creating New Event";
       var formHtml = abc.getEventCreateForm();
       ebot.showModal(headerText, formHtml);
       abc.assignHandlersEventCreateForm();
     });
+    
   },
   
-  assignHandlersEventReadButtons: function() {
-    $(".model-read").click(function() {
-      console.log($(this).attr("event-id"));
-    });
-  },
-  
-  assignHandlersEventUpdateButtons: function() {
-    $(".model-update").click(function() {
-      
-      var eventId = +$(this).attr("event-id");
-      
+  assignHandlersRUD: function() {
+    
+    $("#read").click(function() {
       var event = abc.events.filter(function(event) {
-        return event.eventId === eventId;
+        return event.eventId === abc.selectedEventId;
+      })[0]; 
+      
+      var headerText = event.name;
+      var formHtml = abc.getEventReadForm(event);
+      ebot.showModal(headerText, formHtml);
+      abc.assignHandlersEventReadForm(event);
+    });
+    
+    $("#update").click(function() {
+      var event = abc.events.filter(function(event) {
+        return event.eventId === abc.selectedEventId;
       })[0]; 
       
       var headerText = "Updating Event: " + event.name;
       var formHtml = abc.getEventUpdateForm();
       ebot.showModal(headerText, formHtml);
       abc.assignHandlersEventUpdateForm(event);
-      
     });
-  },
-  
-  assignHandlersEventDeleteButtons: function() {
-    $(".model-delete").click(function() {
-      
-      var eventId = +$(this).attr("event-id");
-      
+    
+    $("#delete").click(function() {
       var event = abc.events.filter(function(event) {
-        return event.eventId === eventId;
+        return event.eventId === abc.selectedEventId;
       })[0]; 
       
       var headerText = "Are you sure you want to delete event: " + event.name + "?";
       var formHtml = abc.getEventDeleteForm();
       ebot.showModal(headerText, formHtml);
       abc.assignHandlersEventDeleteForm(event);
-      
     });
+
+  },
+  
+  getEventReadForm: function(event) {
+    
+    var htmlString = "";
+    
+    for(prop in event) {
+      htmlString += prop + ": " + event[prop] + "<br />";
+    }
+    
+    return htmlString;
+    
+  },
+  
+  assignHandlersEventReadForm: function(event) {
+    return;
   },
   
   getEventCreateForm: function() {
@@ -297,45 +319,53 @@ var abc = {
   assignRedrawHandler: function() {
     
     $("#redraw").click(function() {
-      var today = new Date();
-      today = moment(today);
-      monthAgo = new Date();
-      monthAgo.setMonth(monthAgo.getMonth()-1);
-      
-      var startRange = $("#range-start").val();
-      var endRange = $("#range-end").val();
-      var height = $("#height").val();
-      abc.filterTimelineItems();
-
-      if(startRange === "") {
-        startRange = monthAgo;
-      }
-      
-      if(endRange === "") {
-        endRange = today;
-      }
-
-      if(height < abc.timelineMinHeight || height > abc.timelineMaxHeight) {
-        height = 400;
-        ebot.notify("Please choose a height between " + abc.timelineMinHeight + " and " + abc.timelineMaxHeight + "", 5000);
-      }
-      
-      height = height + "px";
-      
-      var options = {
-        height: height, 
-        min: "2010-1-1",
-        max: today,
-        editable: {updateGroup: true},
-        orientation: "both",
-        stack: abc.isStacked,
-      };
-      
-      abc.timeline.setItems(abc.timelineItems);
-      abc.timeline.setOptions(options);
-      abc.timeline.redraw();
-      abc.timeline.setWindow(startRange, endRange);
+      abc.redrawTimeline();
     });
+    
+  },
+  
+  redrawTimeline: function() {
+    
+    var today = new Date();
+    today = moment(today);
+    monthAgo = new Date();
+    monthForward = new Date();
+    monthAgo.setMonth(monthAgo.getMonth()-1);
+    monthForward.setMonth(monthForward.getMonth()+1);
+    
+    var startDate = $("#range-start").val();
+    var endDate = $("#range-end").val();
+    var height = $("#height").val();
+    abc.filterTimelineItems();
+
+    if(startDate === "") {
+      startDate = monthAgo;
+    }
+    
+    if(endDate === "") {
+      endDate = monthForward;
+    }
+
+    if(height < abc.timelineMinHeight || height > abc.timelineMaxHeight) {
+      height = 400;
+      ebot.notify("Please choose a height between " + abc.timelineMinHeight + " and " + abc.timelineMaxHeight + "", 5000);
+    }
+    
+    height = height + "px";
+    
+    var options = {
+      height: height, 
+      min: "2010-1-1",
+      // max: today,
+      editable: {updateGroup: true},
+      orientation: "both",
+      stack: abc.isStacked,
+    };
+    
+    abc.timeline.setItems(abc.timelineItems);
+    abc.timeline.setOptions(options);
+    abc.timeline.redraw();
+    abc.timeline.setWindow(startDate, endDate);
     
   },
   
@@ -361,21 +391,46 @@ var abc = {
   },
   
   createTimeline: function() {
+    
     $("#timeline").html("");
+    
     var container = document.getElementById("timeline");
     abc.timeline = new vis.Timeline(container);
+    
     abc.timeline.setOptions(abc.getTimelineOptions());
-    abc.createGroups();
-    abc.timeline.setGroups(abc.timelineGroups);
+    
+    // abc.createGroups();
+    // abc.timeline.setGroups(abc.timelineGroups);
+    
     abc.createTimelineItems();
     abc.timeline.setItems(abc.timelineItems);
+    
+  },
+  
+  assignHandlersForTimeline: function() {
+    
+    abc.timeline.on("select", function (properties) {
+      
+      var timelineEvent = properties.event;
+      var eventId = properties.items[0];
+      abc.selectedEventId = eventId;
+      
+      if(!abc.rudActionsVisible) {
+        $("#actions").show(ebot.showOptions);
+        abc.rudActionsVisible = true;
+      }
+      
+    });
+    
   },
   
   createGroups: function() {
+    
     abc.timelineGroups = new vis.DataSet();
     for (var i = 1; i <= 4; i++) {
       abc.timelineGroups.add({id: i, content: "group number " + i});
     }
+    
   },
 
   createTimelineItems: function() {
@@ -389,7 +444,8 @@ var abc = {
   },
   
   filterTimelineItems: function() {
-     abc.timelineItems = new vis.DataSet();
+    
+   abc.timelineItems = new vis.DataSet();
     
     var typeToFilterBy = $("#timeline-filter-select").val();
 
@@ -404,6 +460,7 @@ var abc = {
       }
       
     });
+    
   },
   
   addTimelineItem: function(event) {
@@ -415,64 +472,6 @@ var abc = {
       // end: moment(event.startDate),
       type: "box"
     });
-  },
-  
-  createDynaTable: function() {
-
-    var data = deepcopy(abc.events);
-    
-    data.forEach(function(event) {
-      var htmlString = "";
-      
-      htmlString = "" + 
-      "<button class='btn btn-default model-delete' id='delete-" + event.eventId + "' event-id='" + event.eventId + "'>" + 
-      "<i class='glyphicon glyphicon-trash'></i> </button>" +
-      "<button class='btn btn-default model-update' id='update-" + event.eventId + "' event-id='" + event.eventId + "'>" +
-      "<i class='glyphicon glyphicon-edit'></i> </button>" +
-      "<button class='btn btn-default model-read' data-popup-target='#View-Popup' id='read-" + event.eventId + "' event-id='" + event.eventId + "'>" +
-      "<i class='glyphicon glyphicon-eye-open'></i> </button>";
-   
-      event["actions"] = htmlString;
-      
-    });
-
-    $("#dynatable").dynatable({
-      dataset: {
-        records: data
-      },
-      features: {
-        paginate: true,
-        recordCount: true,
-        sorting: true,
-        search: true
-      },
-    });
-    
-    abc.dynaTable = $('#dynatable').data('dynatable');
-
-  },
-  
-  resetDynaTableHtml: function() {
-    
-    $(".dynatable-wrapper").empty();
-    
-    var htmlString = "" + 
-"<table class='table compact dynatable' id='dynatable'>" + 
-"    <thead>" + 
-"        <tr>" + 
-"            <th>Event ID</th>" + 
-"            <th>Name</th>" + 
-"            <th>Type</th>" + 
-"            <th>Start Date</th>" + 
-"            <th>End Date</th>" + 
-"            <th>Details</th>" + 
-"            <th>Actions</th>" + 
-"        </tr>" + 
-"    </thead>" + 
-"</table>";
-
-    $(".dynatable-wrapper").append(htmlString);
-
   },
   
   retrieveEvents: function() {
@@ -497,6 +496,7 @@ var abc = {
   getTimelineOptions: function() { //this has to be a function because it references one of it's own properties
     return {
       maxHeight: abc.timelineMaxHeight, 
+      minHeight: abc.timelineMinHeight, 
       height: "400px",
       min: "2010-01-01",
       max: "2020-01-01",
@@ -520,6 +520,10 @@ var abc = {
   timelineMaxHeight: 2000,
   
   isPageLoad: true,
+  
+  selectedEventId: 0,
+  
+  rudActionsVisible: false,
   
 };
 

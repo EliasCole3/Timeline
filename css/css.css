@@ -1,20 +1,18 @@
-.hide {
-  display: none !important;
-}
-
 body {
   background-color: #54AFAF !important;
 }
 
-.wrapper {
-  width: 80%;
-  margin-top: 3%;
-  margin-left: 10%;
-  background-color: #F5F5F5;
+.hide {
+  display: none !important;
 }
 
-.dynatable {
-  margin-top: 50px;  
+.wrapper {
+  width: 90%;
+  margin-top: 5%;
+  margin-left: 5%;
+  /* background-color: #d0e9e9; */
+  background-image: url(../images/noise1.png);
+  background-repeat: repeat;
 }
 
 .event-create-button {
@@ -26,6 +24,7 @@ body {
   width: 80%;
   margin-left: 40%;
   margin-bottom: 5%;
+  margin-top: 5%;
 }
 
 textarea {
@@ -43,3 +42,76 @@ textarea {
 #timeline-filter-select {
   width: 200px;
 }
+
+#timeline-controls {
+  margin-bottom: 40px;
+  height: 84px;
+}
+
+#timeline {
+  width: 96%;
+  margin: 0% 2%;
+  margin-bottom: 50px;
+}
+
+#range-start {
+  width: 170px;
+}
+
+#range-end {
+  width: 170px;
+}
+
+#height {
+  width: 120px;
+}
+
+#actions {
+  display: none;
+  margin-left: auto;
+  margin-right: auto;
+  width: 276px;
+}
+
+#actions-wrapper {
+  margin-bottom: 30px;
+}
+
+.timeline-control-wrapper {
+  float: left;
+  margin: 0 10px;
+}
+
+.clear-float {
+  clear: both;
+}
+
+.center-vertical {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

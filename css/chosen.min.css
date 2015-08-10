@@ -56,7 +56,9 @@
         padding-left: 15px; }
       .chosen-container .chosen-results li.active-result {
         cursor: pointer;
-        display: list-item; }
+        display: list-item; 
+        z-index: 10000;
+        }
       .chosen-container .chosen-results li.highlighted {
         background-color: #337ab7;
         background-image: none;
