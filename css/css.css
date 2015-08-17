@@ -15,16 +15,17 @@ body {
   background-repeat: repeat;
 }
 
-.event-create-button {
-  width: 200px;
-  margin: 0 auto;
+#event-create-div-wrapper {
+  margin-bottom: 2%;
 }
 
-.event-create-button-wrapper {
-  width: 80%;
-  margin-left: 40%;
-  margin-bottom: 5%;
-  margin-top: 5%;
+#event-create-div {
+  margin: 0 auto;
+  width: 200px;
+}
+
+.event-create-button {
+  width: 200px;
 }
 
 textarea {
@@ -32,8 +33,7 @@ textarea {
 }
 
 #notifications {
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
   width: 70%;
   text-align: center;
   height: 20px;
@@ -70,7 +70,14 @@ textarea {
   display: none;
   margin-left: auto;
   margin-right: auto;
+}
+
+.actions-single-event {
   width: 276px;
+}
+
+.actions-multiple-events {
+  width: 301px;
 }
 
 #actions-wrapper {

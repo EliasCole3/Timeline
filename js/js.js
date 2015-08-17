@@ -8,23 +8,16 @@ $(function() {
 
 /*
 To do
-
-Design
- - Color scheme
- - Layout
-
-Functionality
- - Timeline filtering
  
-Other
+ user validation
+ filters
+ deploy everything
+ on event create/update, move window to event
+ copy feature
  - Dependency manager
- - Explore DynaTable
  - Clean up server.js
  - Hotkeys
  
- Bugs
- - DynaTable search disables RUD button handlers...
-
 */
 
 /**
@@ -39,7 +32,7 @@ Other
  * getEventDeleteForm()
  * assignHandlersEventCreateForm()
  * assignHandlersEventUpdateForm()
- * assignHandlersEventDeleteForm()
+ * assignHandlersEventDeleteFormSingle()
  * assignStackToggleHandler()
  * assignRedrawHandler()
  * fillTimelineFilterSelect()
@@ -61,11 +54,11 @@ Other
  * timelineMinHeight
  * timelineMaxHeight
  * isPageLoad
- * selectedEventId
+ * lastSelectedEventId
  * rudActionsVisible
  */
 var abc = {
-    
+
   initialize: function() {
     
     abc.assignHandlerEventCreateButton();
@@ -111,8 +104,8 @@ var abc = {
     
     $("#read").click(function() {
       var event = abc.events.filter(function(event) {
-        return event.eventId === abc.selectedEventId;
-      })[0]; 
+        return event.eventId === abc.lastSelectedEventId;
+      })[0];
       
       var headerText = event.name;
       var formHtml = abc.getEventReadForm(event);
@@ -122,7 +115,7 @@ var abc = {
     
     $("#update").click(function() {
       var event = abc.events.filter(function(event) {
-        return event.eventId === abc.selectedEventId;
+        return event.eventId === abc.lastSelectedEventId;
       })[0]; 
       
       var headerText = "Updating Event: " + event.name;
@@ -132,14 +125,29 @@ var abc = {
     });
     
     $("#delete").click(function() {
-      var event = abc.events.filter(function(event) {
-        return event.eventId === abc.selectedEventId;
-      })[0]; 
       
-      var headerText = "Are you sure you want to delete event: " + event.name + "?";
-      var formHtml = abc.getEventDeleteForm();
-      ebot.showModal(headerText, formHtml);
-      abc.assignHandlersEventDeleteForm(event);
+      if(abc.multipleEventsSelected) {
+        var eventIds = abc.timeline.getSelection();
+        
+        var events = abc.events.filter(function(event) {
+          return eventIds.indexOf(event.eventId) > -1;
+        }); 
+        
+        var headerText = "Are you sure you want to delete these events?";
+        var formHtml = abc.getEventDeleteForm();
+        ebot.showModal(headerText, formHtml);
+        abc.assignHandlersEventDeleteFormMultiple(events); 
+      } else {
+        var event = abc.events.filter(function(event) {
+          return event.eventId === abc.lastSelectedEventId;
+        })[0]; 
+        
+        var headerText = "Are you sure you want to delete event: " + event.name + "?";
+        var formHtml = abc.getEventDeleteForm();
+        ebot.showModal(headerText, formHtml);
+        abc.assignHandlersEventDeleteFormSingle(event); 
+      }
+      
     });
 
   },
@@ -274,26 +282,53 @@ var abc = {
   },
   
 
-  assignHandlersEventDeleteForm: function(event) {
+  assignHandlersEventDeleteFormSingle: function(event) {
     
     $("#submit").click(function() {
+      $.when(abc.getDeleteDeferred(event)).done(function() {
+        ebot.notify("event successfully deleted!");
+        $("#actions").hide();
+        abc.rudActionsVisible = false;
+        abc.reset();
+      });
+    });
+    
+  },
 
-      $.ajax({
+  assignHandlersEventDeleteFormMultiple: function(events) {
+    
+    $("#submit").click(function() {
+      var deferreds = [];
+    
+      events.forEach(function(event) {
+        deferreds.push(
+          abc.getDeleteDeferred(event)
+        );
+      });
+      
+      $.when.apply($, deferreds).done(function() {
+        ebot.notify("all events successfully deleted!");
+        $("#actions").hide();
+        abc.rudActionsVisible = false;
+        abc.reset();
+      });
+    });
+    
+  },
+  
+  getDeleteDeferred: function(event) {
+    return $.ajax({
         type: "DELETE",
         url: abc.apiurl + "/" + event._id,
         success: function(data, status, jqXHR) {
           $("#modal").modal("hide");
           console.log(data);
-          abc.reset();
         },
         error: function(jqXHR, status) {
           console.log("error");
           console.log(jqXHR);
         }
       });
-      
-    });
-    
   },
   
   assignStackToggleHandler: function() {
@@ -305,12 +340,12 @@ var abc = {
       var options = {
         maxHeight: "400px", 
         min: "2010-1-1",
-        max: today,
+        max: "2020-01-01",
         editable: {updateGroup: true},
         orientation: "both",
         stack: abc.isStacked,
       };
-      abc.timeline.setOptions(options);
+      abc.timeline.setOptions(abc.getTimelineOptions());
       abc.timeline.redraw();
     });
     
@@ -353,17 +388,10 @@ var abc = {
     
     height = height + "px";
     
-    var options = {
-      height: height, 
-      min: "2010-1-1",
-      // max: today,
-      editable: {updateGroup: true},
-      orientation: "both",
-      stack: abc.isStacked,
-    };
+    abc.timelineOptions.height = height;
     
     abc.timeline.setItems(abc.timelineItems);
-    abc.timeline.setOptions(options);
+    abc.timeline.setOptions(abc.getTimelineOptions());
     abc.timeline.redraw();
     abc.timeline.setWindow(startDate, endDate);
     
@@ -410,18 +438,57 @@ var abc = {
   assignHandlersForTimeline: function() {
     
     abc.timeline.on("select", function (properties) {
-      
-      var timelineEvent = properties.event;
-      var eventId = properties.items[0];
-      abc.selectedEventId = eventId;
-      
+      //the first time an event is selected, show RUD actions
       if(!abc.rudActionsVisible) {
         $("#actions").show(ebot.showOptions);
         abc.rudActionsVisible = true;
       }
       
+      abc.multipleEventsSelected = false;
+      
+      if(properties.items.length > 1) abc.multipleEventsSelected = true;
+      
+      if(abc.multipleEventsSelected) {
+        abc.disableReadButton();
+        abc.disableUpdateButton();
+        abc.changeDeleteButtonMultiple();
+        var selectedIds = properties.items; //alternatively: abc.timeline.getSelection();
+      } else {
+        var index = properties.items.length - 1;
+        abc.lastSelectedEventId = properties.items[index];
+        abc.enableReadButton();
+        abc.enableUpdateButton();
+        abc.changeDeleteButtonSingle();
+      }
+      
     });
     
+  },
+  
+  enableReadButton: function() {
+    $("#read").removeClass("disabled");
+  },
+
+  disableReadButton: function() {
+    $("#read").addClass("disabled");
+  },
+  
+  enableUpdateButton: function() {
+    $("#update").removeClass("disabled");
+  },
+  
+  disableUpdateButton: function() {
+    $("#update").addClass("disabled");
+  },
+  
+  changeDeleteButtonSingle: function() {
+    $("#delete").text("Delete");
+    $("#actions").addClass("actions-single-event").removeClass("actions-multiple-events");
+  },
+  
+  changeDeleteButtonMultiple: function() {
+    $("#delete").text("Delete All");
+    $("#actions").removeClass("actions-single-event").addClass("actions-multiple-events");
   },
   
   createGroups: function() {
@@ -494,17 +561,24 @@ var abc = {
   apiurl: "http://localhost:8081/api/events",
 
   getTimelineOptions: function() { //this has to be a function because it references one of it's own properties
-    return {
-      maxHeight: abc.timelineMaxHeight, 
-      minHeight: abc.timelineMinHeight, 
-      height: "400px",
-      min: "2010-01-01",
-      max: "2020-01-01",
-      editable: {updateGroup: true},
-      start: "2015-06-28",
-      end: "2015-07-10",
-      orientation: "both",
-    };
+
+    var options = deepcopy(abc.timelineOptions);
+    options.maxHeight = abc.timelineMaxHeight;
+    options.minHeight = abc.timelineMinHeight;
+    options.stack = abc.isStacked;
+    return options;
+
+  },
+  
+  timelineOptions: {
+    height: "400px",
+    min: "2010-01-01",
+    max: "2020-01-01",
+    editable: {updateGroup: true},
+    start: "2015-08-1",
+    end: "2015-09-1",
+    orientation: "both",
+    multiselect: true,
   },
   
   timelineGroups: "",
@@ -521,12 +595,14 @@ var abc = {
   
   isPageLoad: true,
   
-  selectedEventId: 0,
+  lastSelectedEventId: 0,
   
   rudActionsVisible: false,
   
-};
+  multipleEventsSelected: false,
+  
 
+};
 
 
 

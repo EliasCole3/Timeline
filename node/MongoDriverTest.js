@@ -1,8 +1,9 @@
 var MongoClient = require("mongodb").MongoClient;
 var assert = require("assert");
 
-// Connection URL
-var url = "mongodb://localhost:27017/timeline";
+// var url = "mongodb://localhost:27017/timeline";
+var url = "mongodb://bilbo:baggins@ds061641.mongolab.com:61641/test1";
+
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
@@ -14,9 +15,9 @@ MongoClient.connect(url, function(err, db) {
     // db.close();
   // });
 
-  updateDocument(db, function() {
-    db.close();
-  });
+  // updateDocument(db, function() {
+    // db.close();
+  // });
 });
 
 var insertDocuments = function(db, callback) {
