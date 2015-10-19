@@ -68,6 +68,7 @@ var abc = {
     abc.assignRedrawHandler();
     abc.assignHandlersRUD();
     abc.assignHandlersTimelineControls();
+    abc.assignHandlersMacroButtons();
     
   },
   
@@ -554,6 +555,40 @@ var abc = {
       }
     });
   },
+  
+  assignHandlersMacroButtons: function() {
+    $(".macro-button").click(function(e) {
+      var button = $(e.currentTarget)
+      var name = button.attr("macro-name")
+      var type = button.attr("macro-type")
+      var today = moment().format("YYYY-MM-DD")
+      
+      var dataForAjax = JSON.stringify({
+        "name" : name,
+        "type" : type,
+        "startDate" : today,
+        "endDate" : "",
+        "details" : "",
+      });
+     
+      $.ajax({
+        type: "POST",
+        url: abc.apiurl,
+        data: dataForAjax,
+        contentType: "application/json; charset=utf-8",
+        success: function(data, status, jqXHR) {
+          $("#modal").modal("hide");
+          console.log(data);
+          abc.reset();
+        },
+        error: function(jqXHR, status) {
+          console.log("error");
+          console.log(jqXHR);
+        }
+      });
+      
+    });
+  },
 
   timeline: "",
 
@@ -568,6 +603,8 @@ var abc = {
     options.maxHeight = abc.timelineMaxHeight;
     options.minHeight = abc.timelineMinHeight;
     options.stack = abc.isStacked;
+    options.start = moment().subtract(2, 'weeks').format("YYYY-MM-DD")
+    options.end = moment().add(1, 'weeks').format("YYYY-MM-DD")
     return options;
 
   },
