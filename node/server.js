@@ -188,6 +188,8 @@ var abc = {
           if(err) {
             console.log(err);
           } else {
+            
+            console.log(docs)
 
             //get the eventId
             var eventId = docs[0].eventId;

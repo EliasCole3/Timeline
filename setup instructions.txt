@@ -1,0 +1,17 @@
+Install MongoDB
+	https://www.digitalocean.com/community/tutorials/how-to-install-mongodb-on-ubuntu-14-04
+
+	sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+	echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+	sudo apt-get update
+	sudo apt-get install -y mongodb-org
+	service mongod status
+
+Create counters and events collections
+
+Run this to start off the counters: $ db.counters.save( { eventId: 1 } )
+
+
+Install Node.js
+
+Run (forever) server.js
