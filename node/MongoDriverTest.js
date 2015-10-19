@@ -3,13 +3,14 @@ var assert = require("assert");
 
 // var url = "mongodb://localhost:27017/timeline";
 var url = "mongodb://bilbo:baggins@ds061641.mongolab.com:61641/test1";
+// var url = "mongodb://bilbo:baggins@ds033133.mongolab.com:33133/timeline";
 
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
-  // db.close();
+  db.close();
   
   // insertDocuments(db, function() {
     // db.close();

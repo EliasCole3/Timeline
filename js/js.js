@@ -17,6 +17,7 @@ To do
  - Dependency manager
  - Clean up server.js
  - Hotkeys
+ textured background for border too
  
 */
 
@@ -559,6 +560,7 @@ var abc = {
   events: [],
   
   apiurl: "http://localhost:8081/api/events",
+  // apiurl: "http://192.241.203.33:8081/api/events",
 
   getTimelineOptions: function() { //this has to be a function because it references one of it's own properties
 

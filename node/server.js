@@ -7,6 +7,7 @@
 var express  = require('express');        // call express
 var app = express();                 // define our app using express
 var bodyParser = require('body-parser');
+// var url = "mongodb://bilbo:baggins@ds033133.mongolab.com:33133/timeline";
 var url = "mongodb://localhost:27017/timeline";
 var mongoClient = require("mongodb").MongoClient;
 var fs = require('fs');
@@ -32,7 +33,12 @@ app.use(allowCrossDomain);
 var port = process.env.PORT || 8081;        // set our port
 
 var mongoose = require('mongoose');
-mongoose.connect(url); // connect to our database
+
+mongoose.connect(url, function(err) {
+  // console.log("error callback")
+  // console.log(err)
+    if (err) throw err;
+}); // connect to our database
 
 
 var Event = require('./app/models/event');
@@ -41,6 +47,7 @@ var router = express.Router();
 
 router.use(function(req, res, next) {
     console.log('Something is happening.');
+    console.log("mongoose.connection.readyState: " + mongoose.connection.readyState);
     next(); // make sure we go to the next routes and don't stop here
 });
 
@@ -77,7 +84,10 @@ router.route('/events')
   })
   
   .get(function(req, res) {
+    console.log("Before Event.find()")
+    // console.log(Event)
       Event.find(function(err, events) {
+        console.log("After Event.find()")
           if(err) {
             res.send(err);
           }
