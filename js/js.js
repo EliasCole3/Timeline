@@ -18,7 +18,8 @@ To do
  - Clean up server.js
  - Hotkeys
  textured background for border too
- 
+ User created custom buttons
+ Profiles
 */
 
 /**
@@ -69,6 +70,8 @@ var abc = {
     abc.assignHandlersRUD();
     abc.assignHandlersTimelineControls();
     abc.assignHandlersMacroButtons();
+    abc.assignHandlersMacroButtonsWithDate();
+    
     
   },
   
@@ -567,6 +570,40 @@ var abc = {
         "name" : name,
         "type" : type,
         "startDate" : today,
+        "endDate" : "",
+        "details" : "",
+      });
+     
+      $.ajax({
+        type: "POST",
+        url: abc.apiurl,
+        data: dataForAjax,
+        contentType: "application/json; charset=utf-8",
+        success: function(data, status, jqXHR) {
+          $("#modal").modal("hide");
+          console.log(data);
+          abc.reset();
+        },
+        error: function(jqXHR, status) {
+          console.log("error");
+          console.log(jqXHR);
+        }
+      });
+      
+    });
+  },
+  
+  assignHandlersMacroButtonsWithDate: function() {
+    $(".macro-button-with-date").click(function(e) {
+      var button = $(e.currentTarget)
+      var name = button.attr("macro-name")
+      var type = button.attr("macro-type")
+      var date = moment($("#date-for-macro-buttons").val()).format("YYYY-MM-DD")
+      
+      var dataForAjax = JSON.stringify({
+        "name" : name,
+        "type" : type,
+        "startDate" : date,
         "endDate" : "",
         "details" : "",
       });
