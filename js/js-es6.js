@@ -62,7 +62,6 @@ To do
 let abc = {
 
   initialize: () => {
-    
     abc.handlerEventCreateButton()
     abc.reset()
     abc.assignStackToggleHandler()
@@ -71,65 +70,49 @@ let abc = {
     abc.handlersTimelineControls()
     abc.handlersMacroButtons()
     abc.handlersMacroButtonsWithDate()
-
   },
   
   reset: () => {
-    
     abc.retrieveEvents().then(() => {
       abc.createTimeline()
       abc.handlersForTimeline()
       abc.fillTimelineFilterSelect()
       abc.isPageLoad = false
     })
-    
   },
   
   handlersTimelineControls: () => {
-    
     $(".timeline-control").change(() => {
       abc.redrawTimeline()
     })
-    
   },
   
   handlerEventCreateButton: () => {
-    
     $("#event-create-button").click(() => {
       let headerText = "Creating New Event"
       let formHtml = abc.getEventCreateForm()
       ebot.showModal(headerText, formHtml)
       abc.handlersEventCreateForm()
     })
-    
   },
   
   handlersRUD: () => {
-    
     $("#read").click(() => {
-      let event = abc.events.filter(event => {
-        return event.eventId === abc.lastSelectedEventId
-      })[0]
-      
+      let event = abc.getEvent(abc.lastSelectedEventId)
       let headerText = event.name
       let formHtml = abc.getEventReadForm(event)
       ebot.showModal(headerText, formHtml)
-      abc.handlersEventReadForm(event)
     })
     
     $("#update").click(() => {
-      let event = abc.events.filter(event => {
-        return event.eventId === abc.lastSelectedEventId
-      })[0] 
-      
-      let headerText = "Updating Event: " + event.name
+      let event = abc.getEvent(abc.lastSelectedEventId)
+      let headerText = `Updating Event: ${event.name}`
       let formHtml = abc.getEventUpdateForm()
       ebot.showModal(headerText, formHtml)
       abc.handlersEventUpdateForm(event)
     })
     
     $("#delete").click(() => {
-      
       if(abc.multipleEventsSelected) {
         let eventIds = abc.timeline.getSelection()
         
@@ -137,71 +120,59 @@ let abc = {
           return eventIds.indexOf(event.eventId) > -1
         }) 
         
-        let headerText = "Are you sure you want to delete these events?"
+        let headerText = `Are you sure you want to delete these events?`
         let formHtml = abc.getEventDeleteForm()
         ebot.showModal(headerText, formHtml)
         abc.handlersEventDeleteFormMultiple(events) 
       } else {
-        let event = abc.events.filter(event => {
-          return event.eventId === abc.lastSelectedEventId
-        })[0] 
-        
-        let headerText = "Are you sure you want to delete event: " + event.name + "?"
+        let event = abc.getEvent(abc.lastSelectedEventId)
+        let headerText = `Are you sure you want to delete event: ${event.name}?`
         let formHtml = abc.getEventDeleteForm()
         ebot.showModal(headerText, formHtml)
         abc.handlersEventDeleteFormSingle(event) 
       }
-      
     })
-
   },
   
   getEventReadForm: event => {
-    
     let htmlString = ""
     
     for(prop in event) {
-      htmlString += prop + ": " + event[prop] + "<br />"
+      htmlString += `${prop}: ${event[prop]}<br />`
     }
     
     return htmlString
-    
-  },
-  
-  handlersEventReadForm: event => {
-    return
   },
   
   getEventCreateForm: () => {
-    let htmlString = "" + 
-      "<label>Name</label><input id='name' type='text' class='form-control' /><br />" + 
-      "<label>Type</label><input id='type' type='text' class='form-control' /><br />" + 
-      "<label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />" + 
-      "<label>End Date</label><input id='end-date' type='date' class='form-control' /><br />" + 
-      "<label>Details</label><textarea id='details' class='form-control' ></textarea><br />" + 
-      "<button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>"
+    let htmlString =
+      `<label>Name</label><input id='name' class='form-control' /><br />
+      <label>Type</label><input id='type' class='form-control' /><br />
+      <label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />
+      <label>End Date</label><input id='end-date' type='date' class='form-control' /><br />
+      <label>Details</label><textarea id='details' class='form-control' ></textarea><br />
+      <button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>`
+
     return htmlString
   },
 
   getEventUpdateForm: () => {
-    let htmlString = "" + 
-      "<label>Name</label><input id='name' type='text' class='form-control' /><br />" + 
-      "<label>Type</label><input id='type' type='text' class='form-control' /><br />" + 
-      "<label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />" + 
-      "<label>End Date</label><input id='end-date' type='date' class='form-control' /><br />" + 
-      "<label>Details</label><textarea id='details' class='form-control' ></textarea><br />" + 
-      "<button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>"
+    let htmlString =
+      `<label>Name</label><input id='name' class='form-control' /><br />
+      <label>Type</label><input id='type' class='form-control' /><br />
+      <label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />
+      <label>End Date</label><input id='end-date' type='date' class='form-control' /><br />
+      <label>Details</label><textarea id='details' class='form-control' ></textarea><br />
+      <button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>`
+
     return htmlString
   },
 
   getEventDeleteForm: () => {
-    let htmlString = "" + 
-      "<button id='submit' class='btn btn-lg form-control' type='submit'>Yes</button>"
-    return htmlString
+    return `<button id='submit' class='btn btn-lg form-control' type='submit'>Yes</button>`
   },
   
   handlersEventCreateForm: () => {
-    
     $("#submit").click(() => {
       
       let name = $("#name").val()
@@ -229,13 +200,12 @@ let abc = {
           abc.reset()
         },
         error: (jqXHR, status) => {
-          console.log("error")
+          ebot.notify("error creating an event")
           console.log(jqXHR)
         }
       })
       
     })
-    
   },
   
   handlersEventUpdateForm: oldEvent => {
@@ -248,7 +218,6 @@ let abc = {
     $("#details").val(oldEvent.details)
     
     $("#submit").click(() => {
-
       let mongoId = oldEvent._id
       let name = $("#name").val()
       let type = $("#type").val()
@@ -273,21 +242,17 @@ let abc = {
         success: (data, status, jqXHR) => {
           $("#modal").modal("hide")
           abc.reset()
-          // abc.dynaTable.records.updateFromJson(abc.events)
         },
         error: (jqXHR, status) => {
-          console.log("error")
+          ebot.notify(`error updating event: ${oldEvent.name}`)
           console.log(jqXHR)
         }
       })
-      
     })
-    
   },
   
 
   handlersEventDeleteFormSingle: event => {
-    
     $("#submit").click(() => {
       $.when(abc.getDeleteDeferred(event)).done(() => {
         ebot.notify("event successfully deleted!")
@@ -296,11 +261,9 @@ let abc = {
         abc.reset()
       })
     })
-    
   },
 
   handlersEventDeleteFormMultiple: events => {
-    
     $("#submit").click(() => {
       let deferreds = []
     
@@ -317,11 +280,10 @@ let abc = {
         abc.reset()
       })
     })
-    
   },
   
   getDeleteDeferred: event => {
-    return $.ajax({
+    let deferred = $.ajax({
         type: "DELETE",
         url: abc.apiurl + "/" + event._id,
         success: (data, status, jqXHR) => {
@@ -329,17 +291,17 @@ let abc = {
           console.log(data)
         },
         error: (jqXHR, status) => {
-          console.log("error")
+          ebot.notify(`error deleting event: ${event.name}`)
           console.log(jqXHR)
         }
       })
+
+    return deferred
   },
   
   assignStackToggleHandler: () => {
-    
     $("#stack-option").click(() => {
-      let today = new Date()
-      today = moment(today)
+      let today = moment()
       abc.isStacked ? abc.isStacked = false : abc.isStacked = true
       let options = {
         maxHeight: "400px", 
@@ -352,25 +314,18 @@ let abc = {
       abc.timeline.setOptions(abc.getTimelineOptions())
       abc.timeline.redraw()
     })
-    
   },
   
   assignRedrawHandler: () => {
-    
     $("#redraw").click(() => {
       abc.redrawTimeline()
     })
-    
   },
   
   redrawTimeline: () => {
-    
-    let today = new Date()
-    today = moment(today)
-    monthAgo = new Date()
-    monthForward = new Date()
-    monthAgo.setMonth(monthAgo.getMonth()-1)
-    monthForward.setMonth(monthForward.getMonth()+1)
+    let today = moment()
+    let monthAgo = moment().subract(1, "months")
+    let monthForward = moment().add(1, "months")
     
     let startDate = $("#range-start").val()
     let endDate = $("#range-end").val()
@@ -391,14 +346,12 @@ let abc = {
     }
     
     height = height + "px"
-    
     abc.timelineOptions.height = height
     
     abc.timeline.setItems(abc.timelineItems)
     abc.timeline.setOptions(abc.getTimelineOptions())
     abc.timeline.redraw()
     abc.timeline.setWindow(startDate, endDate)
-    
   },
   
   fillTimelineFilterSelect: () => {
@@ -408,14 +361,12 @@ let abc = {
       $("#timeline-filter-select").chosen("destroy")
     }
     
-    let htmlString = "<option value=''></option>"
+    let htmlString = `<option value=''></option>`
     
-    let uniqueEventTypes = ebot.getUniqueFields(abc.events, "type")
-    
-    uniqueEventTypes.sort()
+    let uniqueEventTypes = ebot.getUniqueFields(abc.events, "type").sort()
     
     uniqueEventTypes.forEach(eventType => {
-      htmlString += "<option value='" + eventType + "'>" + eventType + "</option>"
+      htmlString += `<option value='${eventType}'>${eventType}</option>`
     })
     
     $("#timeline-filter-select").html(htmlString)
@@ -423,7 +374,6 @@ let abc = {
   },
   
   createTimeline: () => {
-    
     $("#timeline").html("")
     
     let container = document.getElementById("timeline")
@@ -436,12 +386,11 @@ let abc = {
     
     abc.createTimelineItems()
     abc.timeline.setItems(abc.timelineItems)
-    
   },
   
   handlersForTimeline: () => {
-    
     abc.timeline.on("select", function (properties) {
+
       //the first time an event is selected, show RUD actions
       if(!abc.rudActionsVisible) {
         $("#actions").show(ebot.showOptions)
@@ -464,9 +413,7 @@ let abc = {
         abc.enableUpdateButton()
         abc.changeDeleteButtonSingle()
       }
-      
     })
-    
   },
   
   enableReadButton: () => {
@@ -496,26 +443,21 @@ let abc = {
   },
   
   createGroups: () => {
-    
     abc.timelineGroups = new vis.DataSet()
     for (let i = 1; i <= 4; i++) {
       abc.timelineGroups.add({id: i, content: "group number " + i})
     }
-    
   },
 
   createTimelineItems: () => {
-    
     abc.timelineItems = new vis.DataSet()
     
     abc.events.forEach(event => {
       abc.addTimelineItem(event)
     })
-    
   },
   
   filterTimelineItems: () => {
-    
    abc.timelineItems = new vis.DataSet()
     
     let typeToFilterBy = $("#timeline-filter-select").val()
@@ -531,7 +473,6 @@ let abc = {
       }
       
     })
-    
   },
   
   addTimelineItem: event => {
@@ -572,12 +513,15 @@ let abc = {
         "endDate" : "",
         "details" : "",
       })
+
+      console.log(dataForAjax)
      
       $.ajax({
         type: "POST",
         url: abc.apiurl,
         data: dataForAjax,
-        contentType: "application/json charset=utf-8",
+        // contentType: "application/json charset=utf-8",
+        contentType: "application/x-www-form-urlencoded",
         success: (data, status, jqXHR) => {
           $("#modal").modal("hide")
           console.log(data)
@@ -606,7 +550,13 @@ let abc = {
         "endDate" : "",
         "details" : "",
       })
-     
+
+      // abc.createEvent(dataForAjax).then(data => {
+      //   $("#modal").modal("hide")
+      //   console.log(data)
+      //   abc.reset()
+      // })
+
       $.ajax({
         type: "POST",
         url: abc.apiurl,
@@ -634,7 +584,6 @@ let abc = {
   // apiurl: "http://192.241.203.33:8081/api/events",
 
   getTimelineOptions: () => { //this has to be a function because it references one of it's own properties
-
     let options = deepcopy(abc.timelineOptions)
     options.maxHeight = abc.timelineMaxHeight
     options.minHeight = abc.timelineMinHeight
@@ -642,7 +591,34 @@ let abc = {
     options.start = moment().subtract(2, 'weeks').format("YYYY-MM-DD")
     options.end = moment().add(1, 'weeks').format("YYYY-MM-DD")
     return options
+  },
 
+  getEvent: eventId => {
+    let event = abc.events.filter(event => {
+      return event.eventId === eventId
+    })[0]
+
+    return event
+  },
+
+  createEvent: jsonData => {
+    let deferred = $.ajax({
+      type: "POST",
+      url: abc.apiurl,
+      data: jsonData,
+      contentType: "application/json charset=utf-8",
+      success: (data, status, jqXHR) => {
+        $("#modal").modal("hide")
+        console.log(data)
+        abc.reset()
+      },
+      error: (jqXHR, status) => {
+        ebot.notify("error creating an event")
+        console.log(jqXHR)
+      }
+    }).promise()
+
+    return deferred
   },
   
   timelineOptions: {

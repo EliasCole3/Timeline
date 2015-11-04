@@ -61,7 +61,6 @@ To do
 var abc = {
 
   initialize: function initialize() {
-
     abc.handlerEventCreateButton();
     abc.reset();
     abc.assignStackToggleHandler();
@@ -73,7 +72,6 @@ var abc = {
   },
 
   reset: function reset() {
-
     abc.retrieveEvents().then(function () {
       abc.createTimeline();
       abc.handlersForTimeline();
@@ -83,14 +81,12 @@ var abc = {
   },
 
   handlersTimelineControls: function handlersTimelineControls() {
-
     $(".timeline-control").change(function () {
       abc.redrawTimeline();
     });
   },
 
   handlerEventCreateButton: function handlerEventCreateButton() {
-
     $("#event-create-button").click(function () {
       var headerText = "Creating New Event";
       var formHtml = abc.getEventCreateForm();
@@ -100,23 +96,15 @@ var abc = {
   },
 
   handlersRUD: function handlersRUD() {
-
     $("#read").click(function () {
-      var event = abc.events.filter(function (event) {
-        return event.eventId === abc.lastSelectedEventId;
-      })[0];
-
+      var event = abc.getEvent(abc.lastSelectedEventId);
       var headerText = event.name;
       var formHtml = abc.getEventReadForm(event);
       ebot.showModal(headerText, formHtml);
-      abc.handlersEventReadForm(event);
     });
 
     $("#update").click(function () {
-      var event = abc.events.filter(function (event) {
-        return event.eventId === abc.lastSelectedEventId;
-      })[0];
-
+      var event = abc.getEvent(abc.lastSelectedEventId);
       var headerText = "Updating Event: " + event.name;
       var formHtml = abc.getEventUpdateForm();
       ebot.showModal(headerText, formHtml);
@@ -124,7 +112,6 @@ var abc = {
     });
 
     $("#delete").click(function () {
-
       if (abc.multipleEventsSelected) {
         (function () {
           var eventIds = abc.timeline.getSelection();
@@ -139,10 +126,7 @@ var abc = {
           abc.handlersEventDeleteFormMultiple(events);
         })();
       } else {
-        var _event = abc.events.filter(function (event) {
-          return event.eventId === abc.lastSelectedEventId;
-        })[0];
-
+        var _event = abc.getEvent(abc.lastSelectedEventId);
         var headerText = "Are you sure you want to delete event: " + _event.name + "?";
         var formHtml = abc.getEventDeleteForm();
         ebot.showModal(headerText, formHtml);
@@ -152,7 +136,6 @@ var abc = {
   },
 
   getEventReadForm: function getEventReadForm(event) {
-
     var htmlString = "";
 
     for (prop in event) {
@@ -162,27 +145,23 @@ var abc = {
     return htmlString;
   },
 
-  handlersEventReadForm: function handlersEventReadForm(event) {
-    return;
-  },
-
   getEventCreateForm: function getEventCreateForm() {
-    var htmlString = "" + "<label>Name</label><input id='name' type='text' class='form-control' /><br />" + "<label>Type</label><input id='type' type='text' class='form-control' /><br />" + "<label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />" + "<label>End Date</label><input id='end-date' type='date' class='form-control' /><br />" + "<label>Details</label><textarea id='details' class='form-control' ></textarea><br />" + "<button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>";
+    var htmlString = "<label>Name</label><input id='name' class='form-control' /><br />\n      <label>Type</label><input id='type' class='form-control' /><br />\n      <label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />\n      <label>End Date</label><input id='end-date' type='date' class='form-control' /><br />\n      <label>Details</label><textarea id='details' class='form-control' ></textarea><br />\n      <button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>";
+
     return htmlString;
   },
 
   getEventUpdateForm: function getEventUpdateForm() {
-    var htmlString = "" + "<label>Name</label><input id='name' type='text' class='form-control' /><br />" + "<label>Type</label><input id='type' type='text' class='form-control' /><br />" + "<label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />" + "<label>End Date</label><input id='end-date' type='date' class='form-control' /><br />" + "<label>Details</label><textarea id='details' class='form-control' ></textarea><br />" + "<button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>";
+    var htmlString = "<label>Name</label><input id='name' class='form-control' /><br />\n      <label>Type</label><input id='type' class='form-control' /><br />\n      <label>Start Date</label><input id='start-date' type='date' class='form-control' /><br />\n      <label>End Date</label><input id='end-date' type='date' class='form-control' /><br />\n      <label>Details</label><textarea id='details' class='form-control' ></textarea><br />\n      <button id='submit' class='btn btn-lg form-control' type='submit'>Submit</button>";
+
     return htmlString;
   },
 
   getEventDeleteForm: function getEventDeleteForm() {
-    var htmlString = "" + "<button id='submit' class='btn btn-lg form-control' type='submit'>Yes</button>";
-    return htmlString;
+    return "<button id='submit' class='btn btn-lg form-control' type='submit'>Yes</button>";
   },
 
   handlersEventCreateForm: function handlersEventCreateForm() {
-
     $("#submit").click(function () {
 
       var name = $("#name").val();
@@ -210,7 +189,7 @@ var abc = {
           abc.reset();
         },
         error: function error(jqXHR, status) {
-          console.log("error");
+          ebot.notify("error creating an event");
           console.log(jqXHR);
         }
       });
@@ -227,7 +206,6 @@ var abc = {
     $("#details").val(oldEvent.details);
 
     $("#submit").click(function () {
-
       var mongoId = oldEvent._id;
       var name = $("#name").val();
       var type = $("#type").val();
@@ -252,10 +230,9 @@ var abc = {
         success: function success(data, status, jqXHR) {
           $("#modal").modal("hide");
           abc.reset();
-          // abc.dynaTable.records.updateFromJson(abc.events)
         },
         error: function error(jqXHR, status) {
-          console.log("error");
+          ebot.notify("error updating event: " + oldEvent.name);
           console.log(jqXHR);
         }
       });
@@ -263,7 +240,6 @@ var abc = {
   },
 
   handlersEventDeleteFormSingle: function handlersEventDeleteFormSingle(event) {
-
     $("#submit").click(function () {
       $.when(abc.getDeleteDeferred(event)).done(function () {
         ebot.notify("event successfully deleted!");
@@ -275,7 +251,6 @@ var abc = {
   },
 
   handlersEventDeleteFormMultiple: function handlersEventDeleteFormMultiple(events) {
-
     $("#submit").click(function () {
       var deferreds = [];
 
@@ -293,7 +268,7 @@ var abc = {
   },
 
   getDeleteDeferred: function getDeleteDeferred(event) {
-    return $.ajax({
+    var deferred = $.ajax({
       type: "DELETE",
       url: abc.apiurl + "/" + event._id,
       success: function success(data, status, jqXHR) {
@@ -301,17 +276,17 @@ var abc = {
         console.log(data);
       },
       error: function error(jqXHR, status) {
-        console.log("error");
+        ebot.notify("error deleting event: " + event.name);
         console.log(jqXHR);
       }
     });
+
+    return deferred;
   },
 
   assignStackToggleHandler: function assignStackToggleHandler() {
-
     $("#stack-option").click(function () {
-      var today = new Date();
-      today = moment(today);
+      var today = moment();
       abc.isStacked ? abc.isStacked = false : abc.isStacked = true;
       var options = {
         maxHeight: "400px",
@@ -327,20 +302,15 @@ var abc = {
   },
 
   assignRedrawHandler: function assignRedrawHandler() {
-
     $("#redraw").click(function () {
       abc.redrawTimeline();
     });
   },
 
   redrawTimeline: function redrawTimeline() {
-
-    var today = new Date();
-    today = moment(today);
-    monthAgo = new Date();
-    monthForward = new Date();
-    monthAgo.setMonth(monthAgo.getMonth() - 1);
-    monthForward.setMonth(monthForward.getMonth() + 1);
+    var today = moment();
+    var monthAgo = moment().subract(1, "months");
+    var monthForward = moment().add(1, "months");
 
     var startDate = $("#range-start").val();
     var endDate = $("#range-end").val();
@@ -361,7 +331,6 @@ var abc = {
     }
 
     height = height + "px";
-
     abc.timelineOptions.height = height;
 
     abc.timeline.setItems(abc.timelineItems);
@@ -379,9 +348,7 @@ var abc = {
 
     var htmlString = "<option value=''></option>";
 
-    var uniqueEventTypes = ebot.getUniqueFields(abc.events, "type");
-
-    uniqueEventTypes.sort();
+    var uniqueEventTypes = ebot.getUniqueFields(abc.events, "type").sort();
 
     uniqueEventTypes.forEach(function (eventType) {
       htmlString += "<option value='" + eventType + "'>" + eventType + "</option>";
@@ -392,7 +359,6 @@ var abc = {
   },
 
   createTimeline: function createTimeline() {
-
     $("#timeline").html("");
 
     var container = document.getElementById("timeline");
@@ -408,8 +374,8 @@ var abc = {
   },
 
   handlersForTimeline: function handlersForTimeline() {
-
     abc.timeline.on("select", function (properties) {
+
       //the first time an event is selected, show RUD actions
       if (!abc.rudActionsVisible) {
         $("#actions").show(ebot.showOptions);
@@ -462,7 +428,6 @@ var abc = {
   },
 
   createGroups: function createGroups() {
-
     abc.timelineGroups = new vis.DataSet();
     for (var i = 1; i <= 4; i++) {
       abc.timelineGroups.add({ id: i, content: "group number " + i });
@@ -470,7 +435,6 @@ var abc = {
   },
 
   createTimelineItems: function createTimelineItems() {
-
     abc.timelineItems = new vis.DataSet();
 
     abc.events.forEach(function (event) {
@@ -479,7 +443,6 @@ var abc = {
   },
 
   filterTimelineItems: function filterTimelineItems() {
-
     abc.timelineItems = new vis.DataSet();
 
     var typeToFilterBy = $("#timeline-filter-select").val();
@@ -536,11 +499,14 @@ var abc = {
         "details": ""
       });
 
+      console.log(dataForAjax);
+
       $.ajax({
         type: "POST",
         url: abc.apiurl,
         data: dataForAjax,
-        contentType: "application/json charset=utf-8",
+        // contentType: "application/json charset=utf-8",
+        contentType: "application/x-www-form-urlencoded",
         success: function success(data, status, jqXHR) {
           $("#modal").modal("hide");
           console.log(data);
@@ -569,6 +535,12 @@ var abc = {
         "details": ""
       });
 
+      // abc.createEvent(dataForAjax).then(data => {
+      //   $("#modal").modal("hide")
+      //   console.log(data)
+      //   abc.reset()
+      // })
+
       $.ajax({
         type: "POST",
         url: abc.apiurl,
@@ -596,7 +568,6 @@ var abc = {
 
   getTimelineOptions: function getTimelineOptions() {
     //this has to be a function because it references one of it's own properties
-
     var options = deepcopy(abc.timelineOptions);
     options.maxHeight = abc.timelineMaxHeight;
     options.minHeight = abc.timelineMinHeight;
@@ -604,6 +575,34 @@ var abc = {
     options.start = moment().subtract(2, 'weeks').format("YYYY-MM-DD");
     options.end = moment().add(1, 'weeks').format("YYYY-MM-DD");
     return options;
+  },
+
+  getEvent: function getEvent(eventId) {
+    var event = abc.events.filter(function (event) {
+      return event.eventId === eventId;
+    })[0];
+
+    return event;
+  },
+
+  createEvent: function createEvent(jsonData) {
+    var deferred = $.ajax({
+      type: "POST",
+      url: abc.apiurl,
+      data: jsonData,
+      contentType: "application/json charset=utf-8",
+      success: function success(data, status, jqXHR) {
+        $("#modal").modal("hide");
+        console.log(data);
+        abc.reset();
+      },
+      error: function error(jqXHR, status) {
+        ebot.notify("error creating an event");
+        console.log(jqXHR);
+      }
+    }).promise();
+
+    return deferred;
   },
 
   timelineOptions: {

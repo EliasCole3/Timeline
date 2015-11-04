@@ -1,20 +1,17 @@
-// server.js
 
-// BASE SETUP
-// =============================================================================
 
-// call the packages we need
-var express  = require('express');        // call express
-var app = express();                 // define our app using express
+
+
+
+var nomo = require('node-monkey').start();
+var express  = require('express');       
+var app = express();                
 var bodyParser = require('body-parser');
-// var url = "mongodb://bilbo:baggins@ds033133.mongolab.com:33133/timeline";
 var url = "mongodb://localhost:27017/timeline";
 var mongoClient = require("mongodb").MongoClient;
 var fs = require('fs');
 var stringy = require('stringy');
 
-// configure app to use bodyParser()
-// this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -29,30 +26,26 @@ var allowCrossDomain = function(req, res, next) {
 
 app.use(allowCrossDomain);
 
-
-var port = process.env.PORT || 8081;        // set our port
-
+var port = process.env.PORT || 8081;      
 var mongoose = require('mongoose');
+var Event = require('./app/models/event');
+var router = express.Router();
 
 mongoose.connect(url, function(err) {
-  // console.log("error callback")
-  // console.log(err)
-    if (err) throw err;
-}); // connect to our database
+  if (err) throw err;
+}); 
 
-
-var Event = require('./app/models/event');
-
-var router = express.Router();     
 
 router.use(function(req, res, next) {
     console.log('Something is happening.');
-    console.log("mongoose.connection.readyState: " + mongoose.connection.readyState);
-    next(); // make sure we go to the next routes and don't stop here
+    // console.log("mongoose.connection.readyState: " + mongoose.connection.readyState);
+    
+    // make sure we go to the next routes and don't stop here
+    next(); 
 });
 
 router.get('/', function(req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });
+  res.json({ message: 'hooray! welcome to our api!' });
 });
 
 
@@ -62,20 +55,35 @@ router.route('/events')
       
     abc.getAndUpdateCounter(function(eventId) {
       
-      var event = new Event();    
-      
+      var event = new Event();
+
+      //hacks to get to the payload data, 11.04.15
+      var eventData
+      for(var prop in req.body) {
+        eventData = prop
+      }
+      eventData = JSON.parse(eventData)
+
+
       event.eventId = eventId;
-      event.name = req.body.name;  
-      event.type = req.body.type;  
-      event.startDate = req.body.startDate;  
-      event.endDate = req.body.endDate;  
-      event.details = req.body.details;  
+
+      // event.name = req.body.name;
+      // event.type = req.body.type;
+      // event.startDate = req.body.startDate;
+      // event.endDate = req.body.endDate;
+      // event.details = req.body.details;
+
+      event.name = eventData.name;
+      event.type = eventData.type;
+      event.startDate = eventData.startDate;
+      event.endDate = eventData.endDate;
+      event.details = eventData.details;
 
       event.save(function(err) {
           if(err) {
             res.send(err);
           }
-          console.log("post method called");
+          // console.log("post method called");
           res.json({ message: 'Event created!', event: event });
       });
       
@@ -84,17 +92,16 @@ router.route('/events')
   })
   
   .get(function(req, res) {
-    console.log("Before Event.find()")
-    // console.log(Event)
+
       Event.find(function(err, events) {
-        console.log("After Event.find()")
           if(err) {
             res.send(err);
           }
+
           //necessary with middleware?
           res.header("Access-Control-Allow-Origin", "*");
           res.header("Access-Control-Allow-Headers", "X-Requested-With");
-          console.log("get method called");
+          // console.log("get method called");
           res.json(events);
       });
   });
@@ -121,11 +128,24 @@ router.route('/events/:event_id')
             res.send(err);
           }
 
-          event.name = req.body.name;  
-          event.type = req.body.type;  
-          event.startDate = req.body.startDate;  
-          event.endDate = req.body.endDate;  
-          event.details = req.body.details; 
+          //hacks to get to the payload data, 11.04.15
+          var eventData
+          for(var prop in req.body) {
+            eventData = prop
+          }
+          eventData = JSON.parse(eventData)
+
+          event.name = eventData.name;
+          event.type = eventData.type;
+          event.startDate = eventData.startDate;
+          event.endDate = eventData.endDate;
+          event.details = eventData.details;
+
+          // event.name = req.body.name;  
+          // event.type = req.body.type;  
+          // event.startDate = req.body.startDate;  
+          // event.endDate = req.body.endDate;  
+          // event.details = req.body.details; 
 
           event.save(function(err) {
               if(err) {
@@ -189,22 +209,18 @@ var abc = {
             console.log(err);
           } else {
             
-            console.log(docs)
+            // console.log("docs: ")
+            // console.log(docs)
 
             //get the eventId
             var eventId = docs[0].eventId;
             var newEventId = eventId + 1;
             
-            // console.log("eventId: " + eventId);
-            // console.log("newEventId: " + newEventId);
-            
             //update the eventId to eventId++ for next time
             var search  = { eventId: eventId };
             var update = { $set: { eventId : newEventId } };
-            collection.update(
-            search, 
-            update, 
-            function(err, result) {
+            collection.update(search, update, function(err, result) {
+
               //close the connection and continue process the callback to continue with execution
               db.close();
               callback(eventId);
