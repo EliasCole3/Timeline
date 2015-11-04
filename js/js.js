@@ -178,20 +178,10 @@ var abc = {
         "details": details
       });
 
-      $.ajax({
-        type: "POST",
-        url: abc.apiurl,
-        data: dataForAjax,
-        contentType: "application/json charset=utf-8",
-        success: function success(data, status, jqXHR) {
-          $("#modal").modal("hide");
-          console.log(data);
-          abc.reset();
-        },
-        error: function error(jqXHR, status) {
-          ebot.notify("error creating an event");
-          console.log(jqXHR);
-        }
+      abc.createEvent(dataForAjax).then(function (data) {
+        $("#modal").modal("hide");
+        console.log(data);
+        abc.reset();
       });
     });
   },
@@ -499,23 +489,10 @@ var abc = {
         "details": ""
       });
 
-      console.log(dataForAjax);
-
-      $.ajax({
-        type: "POST",
-        url: abc.apiurl,
-        data: dataForAjax,
-        // contentType: "application/json charset=utf-8",
-        contentType: "application/x-www-form-urlencoded",
-        success: function success(data, status, jqXHR) {
-          $("#modal").modal("hide");
-          console.log(data);
-          abc.reset();
-        },
-        error: function error(jqXHR, status) {
-          console.log("error");
-          console.log(jqXHR);
-        }
+      abc.createEvent(dataForAjax).then(function (data) {
+        $("#modal").modal("hide");
+        console.log(data);
+        abc.reset();
       });
     });
   },
@@ -535,26 +512,10 @@ var abc = {
         "details": ""
       });
 
-      // abc.createEvent(dataForAjax).then(data => {
-      //   $("#modal").modal("hide")
-      //   console.log(data)
-      //   abc.reset()
-      // })
-
-      $.ajax({
-        type: "POST",
-        url: abc.apiurl,
-        data: dataForAjax,
-        contentType: "application/json charset=utf-8",
-        success: function success(data, status, jqXHR) {
-          $("#modal").modal("hide");
-          console.log(data);
-          abc.reset();
-        },
-        error: function error(jqXHR, status) {
-          console.log("error");
-          console.log(jqXHR);
-        }
+      abc.createEvent(dataForAjax).then(function (data) {
+        $("#modal").modal("hide");
+        console.log(data);
+        abc.reset();
       });
     });
   },
@@ -590,12 +551,9 @@ var abc = {
       type: "POST",
       url: abc.apiurl,
       data: jsonData,
-      contentType: "application/json charset=utf-8",
-      success: function success(data, status, jqXHR) {
-        $("#modal").modal("hide");
-        console.log(data);
-        abc.reset();
-      },
+      // contentType: "application/json charset=utf-8",
+      contentType: "application/x-www-form-urlencoded",
+      success: function success(data, status, jqXHR) {},
       error: function error(jqXHR, status) {
         ebot.notify("error creating an event");
         console.log(jqXHR);
@@ -619,8 +577,6 @@ var abc = {
   timelineGroups: "",
 
   timelineItems: [],
-
-  dynaTable: {},
 
   isStacked: true,
 
