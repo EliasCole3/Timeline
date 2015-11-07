@@ -138,7 +138,7 @@ var abc = {
   getEventReadForm: function getEventReadForm(event) {
     var htmlString = "";
 
-    for (prop in event) {
+    for (var prop in event) {
       htmlString += prop + ": " + event[prop] + "<br />";
     }
 
@@ -299,7 +299,7 @@ var abc = {
 
   redrawTimeline: function redrawTimeline() {
     var today = moment();
-    var monthAgo = moment().subract(1, "months");
+    var monthAgo = moment().subtract(1, "months");
     var monthForward = moment().add(1, "months");
 
     var startDate = $("#range-start").val();

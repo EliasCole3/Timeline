@@ -135,7 +135,7 @@ let abc = {
   getEventReadForm: event => {
     let htmlString = ""
     
-    for(prop in event) {
+    for(let prop in event) {
       htmlString += `${prop}: ${event[prop]}<br />`
     }
     
@@ -312,7 +312,7 @@ let abc = {
   
   redrawTimeline: () => {
     let today = moment()
-    let monthAgo = moment().subract(1, "months")
+    let monthAgo = moment().subtract(1, "months")
     let monthForward = moment().add(1, "months")
     
     let startDate = $("#range-start").val()
