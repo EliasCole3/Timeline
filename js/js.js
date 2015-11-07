@@ -13,12 +13,12 @@ To do
  deploy everything
  on event create/update, move window to event
  copy feature
- - Dependency manager
- - Clean up server.js
- - Hotkeys
+ Clean up server.js
+ hotkeys
  textured background for border too
  User created custom buttons
  Profiles
+ Intern tests
 */
 
 /**
@@ -503,6 +503,7 @@ var abc = {
       var name = button.attr("macro-name");
       var type = button.attr("macro-type");
       var date = moment($("#date-for-macro-buttons").val()).format("YYYY-MM-DD");
+      console.log(date);
 
       var dataForAjax = JSON.stringify({
         "name": name,

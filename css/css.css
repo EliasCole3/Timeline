@@ -13,6 +13,7 @@ body {
   /* background-color: #d0e9e9; */
   background-image: url(../images/noise1.png);
   background-repeat: repeat;
+  margin-bottom: 5%;
 }
 
 #event-create-div-wrapper {

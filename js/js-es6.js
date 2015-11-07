@@ -1,5 +1,3 @@
-
-  
 $(() => {
   abc.initialize()
   // ebot.updateDocumentation(abc)
@@ -14,12 +12,12 @@ To do
  deploy everything
  on event create/update, move window to event
  copy feature
- - Dependency manager
- - Clean up server.js
- - Hotkeys
+ Clean up server.js
+ hotkeys
  textured background for border too
  User created custom buttons
  Profiles
+ Intern tests
 */
 
 /**
@@ -520,6 +518,7 @@ let abc = {
       let name = button.attr("macro-name")
       let type = button.attr("macro-type")
       let date = moment($("#date-for-macro-buttons").val()).format("YYYY-MM-DD")
+      console.log(date)
       
       let dataForAjax = JSON.stringify({
         "name" : name,
